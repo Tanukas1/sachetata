@@ -1,0 +1,31 @@
+.masonry-grid {
+  margin-left: -10px;
+  margin-right: -10px;
+}
+
+.masonry-item {
+  padding: 5px;
+}
+.masonry-item img
+{
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 8px;
+  transition: transform 0.3s ease-in-out;
+  object-fit: cover;
+}
+/* 
+.masonry-item video {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 8px;
+  transition: transform 0.3s ease-in-out;
+  object-fit: cover;
+} */
+
+.masonry-item img:hover,
+.masonry-item video:hover {
+  transform: scale(1.05);
+}

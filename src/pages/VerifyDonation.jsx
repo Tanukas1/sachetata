@@ -1,7 +1,35 @@
-import React from "react";
+import React, { useState } from "react";
 import Layout from "../layout/Layout";
 
-function VarifyDonation() {
+function VerifyDonation() {
+  const [formData, setFormData] = useState({
+    firstName: "",
+    email: "",
+    contactNumber: "",
+    donationAmount: "",
+    screenshot: null
+  });
+
+  const handleChange = (e) => {
+    const { name, value, type, files } = e.target;
+    if (type === "file") {
+      setFormData({
+        ...formData,
+        [name]: files[0] 
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value
+      });
+    }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log("Form Submitted:", formData);
+  };
+
   return (
     <Layout>
       <div>
@@ -9,9 +37,9 @@ function VarifyDonation() {
         <div>
           <img
             loading="lazy"
-            src="assets\img\donate-banner.webp"
+            src="assets/img/donate-banner.webp"
             className="img-fluid"
-            alt
+            alt=""
           />
         </div>
         <section className="pt-5 pb-5">
@@ -25,107 +53,97 @@ function VarifyDonation() {
                 <div className="panel panel-default">
                   <div className="panel-body">
                     <div className="bodyTest">
-                      <form className>
+                      <form onSubmit={handleSubmit}>
                         <div className="row">
                           <div className="col-sm-6 mb-2">
-                            {/* first name input*/}
+                            {/* First Name input */}
                             <div className="form-group">
-                              <label
-                                htmlFor="firstname"
-                                className="control-label"
-                              >
+                              <label htmlFor="firstName" className="control-label">
                                 First Name
                               </label>
-                              <div className>
-                                <input
-                                  id="first-name"
-                                  name="name"
-                                  type="text"
-                                  autoComplete="Full Name"
-                                  placeholder="first Name"
-                                  className="form-control"
-                                />
-                                <p className="help-block" />
-                              </div>
+                              <input
+                                id="firstName"
+                                name="firstName"
+                                type="text"
+                                autoComplete="Full Name"
+                                placeholder="First Name"
+                                className="form-control"
+                                value={formData.firstName}
+                                onChange={handleChange}
+                              />
                             </div>
                           </div>
                           <div className="col-sm-6 mb-2">
+                            {/* Email input */}
                             <div className="form-group">
-                              <label
-                                htmlFor="lastemail"
-                                className="control-label"
-                              >
+                              <label htmlFor="email" className="control-label">
                                 Email
                               </label>
-                              <div className>
-                                <input
-                                  id="last-name"
-                                  name="lastname"
-                                  type="email"
-                                  autoComplete="email"
-                                  placeholder="Email"
-                                  className="form-control"
-                                />
-                                <p className="help-block" />
-                              </div>
+                              <input
+                                id="email"
+                                name="email"
+                                type="email"
+                                autoComplete="email"
+                                placeholder="Email"
+                                className="form-control"
+                                value={formData.email}
+                                onChange={handleChange}
+                              />
                             </div>
                           </div>
                           <div className="col-sm-6 mb-2">
-                            <div className="control-group">
-                              <label
-                                htmlFor="company"
-                                className="control-label "
-                              >
+                            {/* Contact Number input */}
+                            <div className="form-group">
+                              <label htmlFor="contactNumber" className="control-label">
                                 Contact No
                               </label>
-                              <div className>
-                                <input
-                                  id="company"
-                                  name="contact_number"
-                                  type="text"
-                                  autoComplete="Contact Number"
-                                  placeholder="Contact Number"
-                                  className="form-control"
-                                />
-                                <p className="help-block" />
-                              </div>
+                              <input
+                                id="contactNumber"
+                                name="contactNumber"
+                                type="text"
+                                autoComplete="Contact Number"
+                                placeholder="Contact Number"
+                                className="form-control"
+                                value={formData.contactNumber}
+                                onChange={handleChange}
+                              />
                             </div>
                           </div>
                           <div className="col-sm-6 mb-2">
-                            <div className="control-group">
-                              <label className="control-label">
+                            {/* Donation Amount input */}
+                            <div className="form-group">
+                              <label htmlFor="donationAmount" className="control-label">
                                 Donation Amount Paid
                               </label>
-                              <div className>
-                                <input
-                                  id="number"
-                                  name="Donation Amount Paid"
-                                  type="text"
-                                  autoComplete="Donation Amount Paid"
-                                  placeholder="Donation Amount Paid"
-                                  className="form-control"
-                                />
-                              </div>
+                              <input
+                                id="donationAmount"
+                                name="donationAmount"
+                                type="text"
+                                autoComplete="Donation Amount Paid"
+                                placeholder="Donation Amount Paid"
+                                className="form-control"
+                                value={formData.donationAmount}
+                                onChange={handleChange}
+                              />
                             </div>
                           </div>
                           <div className="col-sm-12 mb-2">
-                            <div className="control-group">
-                              <label className="control-label">
+                            {/* Screenshot Upload */}
+                            <div className="form-group">
+                              <label htmlFor="screenshot" className="control-label">
                                 Donation Amount Screenshot (Upload)
                               </label>
-                              <div className>
-                                <input
-                                  id="city"
-                                  name="screenshot"
-                                  type="file"
-                                  autoComplete="Donation Amount Screenshot (Upload)"
-                                  placeholder="Donation Amount Screenshot (Upload)"
-                                  className="form-control"
-                                />
-                              </div>
+                              <input
+                                id="screenshot"
+                                name="screenshot"
+                                type="file"
+                                className="form-control"
+                                onChange={handleChange}
+                              />
                             </div>
                           </div>
                           <div className="col-md-12 mt-3 mb-2">
+                            {/* Submit Button */}
                             <button
                               id="submit"
                               className="default-btn"
@@ -148,4 +166,4 @@ function VarifyDonation() {
   );
 }
 
-export default VarifyDonation;
+export default VerifyDonation;

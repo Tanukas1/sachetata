@@ -22,23 +22,39 @@ function Sponsor() {
     preferenceState: "",
   });
 
+<<<<<<< HEAD
 
+=======
+  // Handle Input Change
+>>>>>>> 180b520e0e3eaf123690d0fbef5e3f68c32f014f
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  // Handle Checkbox Change
   const handleCheckboxChange = (e) => {
     setFormData({ ...formData, receiveCertificate: e.target.checked });
   };
 
+<<<<<<< HEAD
 
+=======
+  // Handle Date Change
+>>>>>>> 180b520e0e3eaf123690d0fbef5e3f68c32f014f
   const handleDateChange = (date) => {
     setBirthdate(date);
   };
 
+<<<<<<< HEAD
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log(formData); 
+=======
+  // Handle Submit
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log(formData); // You can replace this with an API call to submit data
+>>>>>>> 180b520e0e3eaf123690d0fbef5e3f68c32f014f
   };
 
   return (

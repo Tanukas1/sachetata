@@ -22,11 +22,7 @@ function Sponsor() {
     preferenceState: "",
   });
 
-<<<<<<< HEAD
-
-=======
   // Handle Input Change
->>>>>>> 180b520e0e3eaf123690d0fbef5e3f68c32f014f
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -36,25 +32,15 @@ function Sponsor() {
     setFormData({ ...formData, receiveCertificate: e.target.checked });
   };
 
-<<<<<<< HEAD
-
-=======
   // Handle Date Change
->>>>>>> 180b520e0e3eaf123690d0fbef5e3f68c32f014f
   const handleDateChange = (date) => {
     setBirthdate(date);
   };
 
-<<<<<<< HEAD
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log(formData); 
-=======
   // Handle Submit
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(formData); // You can replace this with an API call to submit data
->>>>>>> 180b520e0e3eaf123690d0fbef5e3f68c32f014f
+    console.log(formData); // Replace this with API call to submit data
   };
 
   return (
@@ -66,7 +52,7 @@ function Sponsor() {
             loading="lazy"
             src="assets/images/banner/sponsor.webp"
             className="img-fluid"
-            alt
+            alt="Sponsor Banner"
           />
         </div>
         <section className="pt-5 pb-5">
@@ -107,14 +93,9 @@ function Sponsor() {
                               )}
                             </div>
                           </div>
-
-                          {/* Dedicating Donation */}
-                          <div className="col-12 col-sm-12">
-                            <h3 className="mt-3">
-                              I want to dedicate my donation in memory of someone
-                            </h3>
+                          <div class="col-12 col-sm-12">
+                            <h3 class="mt-3">I want to dedicate my donation in memory of someone</h3>
                           </div>
-
                           {/* Full Name */}
                           <div className="col-12 col-sm-6 mb-3">
                             <div className="control-group">
@@ -139,7 +120,7 @@ function Sponsor() {
                               <div>
                                 <input
                                   name="email"
-                                  type="text"
+                                  type="email"
                                   value={formData.email}
                                   onChange={handleChange}
                                   placeholder="Email"
@@ -208,7 +189,7 @@ function Sponsor() {
                                   type="text"
                                   value={formData.alternateMobileNo}
                                   onChange={handleChange}
-                                  placeholder="Mobile Number"
+                                  placeholder="Alternate Mobile No."
                                   className="form-control"
                                 />
                               </div>
@@ -233,6 +214,7 @@ function Sponsor() {
                           </div>
 
                           {/* Address */}
+                          
                           <div className="col-12 col-sm-6 mb-3">
                             <div className="control-group">
                               <label className="control-label">Address</label>
@@ -264,23 +246,22 @@ function Sponsor() {
                           {/* Conditional Fields for Certificate */}
                           {formData.receiveCertificate && (
                             <>
-                              <div className="col-sm-6">
+                              <div className="col-sm-6 mb-2">
                                 <div className="control-group">
                                   <label className="control-label ">Pan Number</label>
                                   <div>
-                                    <input
-                                      name="panNumber"
-                                      type="text"
-                                      value={formData.panNumber}
-                                      onChange={handleChange}
-                                      placeholder="Pan Card No."
-                                      className="form-control"
-                                    />
+                                  <input
+                                    name="panNumber" 
+                                    type="text"
+                                    value={formData.panNumber}
+                                    onChange={handleChange}
+                                    placeholder="Pan Card No."
+                                    className="form-control"
+                                  />
                                   </div>
                                 </div>
                               </div>
-
-                              <div className="col-sm-6">
+                              <div className="col-sm-6 mb-2">
                                 <div className="control-group">
                                   <label className="control-label ">Address*</label>
                                   <div>
@@ -296,7 +277,7 @@ function Sponsor() {
                                 </div>
                               </div>
 
-                              <div className="col-sm-6">
+                              <div className="col-sm-6 mb-2">
                                 <div className="control-group">
                                   <label className="control-label ">Pin Code*</label>
                                   <div>
@@ -312,7 +293,7 @@ function Sponsor() {
                                 </div>
                               </div>
 
-                              <div className="col-sm-6">
+                              <div className="col-sm-6 mb-2">
                                 <div className="control-group">
                                   <label className="control-label ">City*</label>
                                   <div>
@@ -328,7 +309,7 @@ function Sponsor() {
                                 </div>
                               </div>
 
-                              <div className="col-sm-6">
+                              <div className="col-sm-6 mb-2">
                                 <div className="control-group">
                                   <label className="control-label ">State*</label>
                                   <div>

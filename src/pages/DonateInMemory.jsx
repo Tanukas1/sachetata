@@ -13,11 +13,23 @@ function DonateInMemory() {
     relationship: "",
     occasionName: "",
     occasionDate: "",
+    fullName: "",
+    email: "",
+    mobile: "",
+    altMobile: "",
     receiveCertificate: false,
+    pan: "",
+    address: "",
+    pinCode: "",
+    city: "",
+    state: "",
+    prefState: "",
   });
+
   // Handle Input Change
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleCheckboxChange = (e) => {
@@ -33,7 +45,7 @@ function DonateInMemory() {
             loading="lazy"
             src="assets/images/banner/memory.webp"
             className="img-fluid"
-            alt
+            alt="memory banner"
           />
         </div>
         <section className="padding pb-5">
@@ -45,357 +57,254 @@ function DonateInMemory() {
               <div className="col-xs-12 col-md-12">
                 <div className="panel panel-default">
                   <div className="panel-body">
-                    <div className="bodyTest">
-                      <form className>
-                        <div className="row">
-                          <div className="col-12 col-sm-12 mt-2">
-                            {/* first name input*/}
-                            <h3>Select your citizenship</h3>
-                            <div className="d-flex flex-wrap gap-4">
-                              {[
-                                "Indian Citizen",
-                                "Indian Citizen (NRE, NRI, NRO)",
-                                "Foreign National",
-                              ].map((type) => (
-                                <div
-                                  key={type}
-                                  className="form-check form-check-inline"
-                                >
-                                  <input
-                                    type="radio"
-                                    name="citizenship"
-                                    value={type}
-                                    checked={formData.citizenship === type}
-                                    onChange={handleChange}
-                                    className="form-check-input"
-                                  />
-                                  <label className="form-check-label">
-                                    {type}
-                                  </label>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                          <div className="col-12 col-sm-12 mt-2">
-                            <h3 className="mt-3">Select donation type</h3>
-                            <div className="d-flex gap-4">
-                              {["Donate Once", "Donate Monthly"].map((type) => (
-                                <div
-                                  key={type}
-                                  className="form-check form-check-inline"
-                                >
-                                  <input
-                                    type="radio"
-                                    name="donationType"
-                                    value={type}
-                                    checked={formData.donationType === type}
-                                    onChange={handleChange}
-                                    className="form-check-input"
-                                  />
-                                  <label className="form-check-label">
-                                    {type}
-                                  </label>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                          <div className="col-12 col-sm-12 mt-2">
-                            <h3>
-                              I want my donation to be dedicated to: In Memory
-                              Of
-                            </h3>
-                          </div>
-                          {/* phone number input*/}
-                          <div className="col-12 col-sm-6 mb-2">
-                            <div className="control-group">
-                              <label className="control-label">
-                                Honoree Name
-                              </label>
-                              <div className>
+                    <form>
+                      <div className="row">
+                        <div className="col-12 col-sm-12 mt-2">
+                          <h3>Select your citizenship</h3>
+                          <div className="d-flex flex-wrap gap-4">
+                            {[
+                              "Indian Citizen",
+                              "Indian Citizen (NRE, NRI, NRO)",
+                              "Foreign National",
+                            ].map((type) => (
+                              <div key={type} className="form-check form-check-inline">
                                 <input
-                                  id="number"
-                                  name="number"
-                                  type="text"
-                                  autoComplete="Honoree"
-                                  placeholder="Honoree Name"
-                                  className="form-control"
+                                  type="radio"
+                                  name="citizenship"
+                                  value={type}
+                                  checked={formData.citizenship === type}
+                                  onChange={handleChange}
+                                  className="form-check-input"
                                 />
+                                <label className="form-check-label">{type}</label>
                               </div>
-                            </div>
-                          </div>
-                          {/* address-line1 input*/}
-                          <div className="col-12 col-sm-6 mb-2">
-                            <div className="control-group">
-                              <label className="control-label">
-                                Relationship With
-                              </label>
-                              <div className=" ">
-                                <input
-                                  id="address"
-                                  name="address"
-                                  type="text"
-                                  autoComplete="address"
-                                  placeholder="Relationship With"
-                                  className="form-control"
-                                />
-                              </div>
-                            </div>
-                          </div>
-                          <div className="col-12 col-sm-6 mb-2">
-                            <div className="control-group">
-                              <label className="control-label">
-                                Occassion Name
-                              </label>
-                              <div className>
-                                <input
-                                  id="Occassion Name"
-                                  name="Occassion Name"
-                                  type="text"
-                                  autoComplete="Occassion Name"
-                                  placeholder="Occassion Name"
-                                  className="form-control"
-                                />
-                                <p className="help-block" />
-                              </div>
-                            </div>
-                            {/* region input*/}
-                          </div>
-                          <div className="col-12 col-sm-6 mb-2">
-                            <div className="control-group">
-                              <label className="control-label">
-                                Occasion Date
-                              </label>
-                              <div className>
-                                <DatePicker
-                                  selected={birthdate}
-                                  onChange={(date) => setBirthdate(date)}
-                                  placeholderText="Select Date"
-                                  className="form-control"
-                                />
-                                <p className="help-block" />
-                              </div>
-                            </div>
-                          </div>
-                          <div className="col-12 col-sm-6 mb-2">
-                            <div className="control-group">
-                              <label className="control-label ">
-                                Full Name
-                              </label>
-                              <div className>
-                                <input
-                                  id="Full Name"
-                                  name="Full Name"
-                                  type="text"
-                                  autoComplete="Full Name"
-                                  placeholder="Full Name"
-                                  className="form-control"
-                                />
-                                <p className="help-block" />
-                              </div>
-                            </div>
-                          </div>
-                          <div className="col-12 col-sm-6 mb-2">
-                            {/* country select */}
-                            <div className="control-group">
-                              <label className="control-label">Email</label>
-                              <div className>
-                                <input
-                                  id="Email"
-                                  name="Email"
-                                  type="text"
-                                  autoComplete="Email"
-                                  placeholder="Email"
-                                  className="form-control"
-                                />
-                              </div>
-                            </div>
-                          </div>
-                          <div className="col-12 col-sm-6 mb-2">
-                            {/* country select */}
-                            <div className="control-group">
-                              <label className="control-label ">
-                                Birthdate
-                              </label>
-                              <div className>
-                                <DatePicker
-                                  selected={birthdate}
-                                  onChange={(date) => setBirthdate(date)}
-                                  placeholderText="Select your birthdate"
-                                  className="form-control"
-                                />
-                              </div>
-                            </div>
-                          </div>
-                          <div className="col-12 col-sm-6 mb-2">
-                            {/* country select */}
-                            <div className="control-group">
-                              <label className="control-label ">
-                                Mobile No.*
-                              </label>
-                              <div className>
-                                <input
-                                  id="Mobile No"
-                                  name="Mobile No"
-                                  type="text"
-                                  autoComplete="Mobile No"
-                                  placeholder="Mobile No.*"
-                                  className="form-control"
-                                />
-                              </div>
-                            </div>
-                          </div>
-                          <div className="col-12 col-sm-12 mb-2">
-                            {/* country select */}
-                            <div className="control-group">
-                              <label className="control-label ">
-                                Alternate Mobile No.
-                              </label>
-                              <div className>
-                                <input
-                                  id="Country"
-                                  name="Country"
-                                  type="text"
-                                  autoComplete="Address"
-                                  placeholder="Mobile Number"
-                                  className="form-control"
-                                />
-                              </div>
-                            </div>
-                          </div>
-                          <div className="col-12 col-sm-12 mb-2">
-                            <h4 className="mt-3">
-                              <input
-                                type="checkbox"
-                                checked={formData.receiveCertificate}
-                                onChange={handleCheckboxChange}
-                              />{" "}
-                              I would like to receive 80(G) Certificate
-                            </h4>
-                          </div>
-                          {formData.receiveCertificate && (
-                            <>
-                              <div className="col-sm-6">
-                                {/* country select */}
-                                <div className="control-group">
-                                  <label className="control-label ">
-                                    Pan Number
-                                  </label>
-                                  <div className>
-                                    <input
-                                      id="Country"
-                                      name="Country"
-                                      type="text"
-                                      autoComplete="Address"
-                                      placeholder="Pan Card No."
-                                      className="form-control"
-                                    />
-                                  </div>
-                                </div>
-                              </div>
-                              <div className="col-sm-6">
-                                {/* country select */}
-                                <div className="control-group">
-                                  <label className="control-label ">
-                                    Address*
-                                  </label>
-                                  <div className>
-                                    <input
-                                      id="Address"
-                                      name="Address"
-                                      type="text"
-                                      autoComplete="Address"
-                                      placeholder="Address"
-                                      className="form-control"
-                                    />
-                                  </div>
-                                </div>
-                              </div>
-                              <div className="col-sm-6">
-                                {/* country select */}
-                                <div className="control-group">
-                                  <label className="control-label ">
-                                    Pin Code*
-                                  </label>
-                                  <div className>
-                                    <input
-                                      id="Pin Code"
-                                      name="Pin Code"
-                                      type="text"
-                                      autoComplete="Pin Code"
-                                      placeholder="Pin Code"
-                                      className="form-control"
-                                    />
-                                  </div>
-                                </div>
-                              </div>
-                              <div className="col-sm-6">
-                                {/* country select */}
-                                <div className="control-group">
-                                  <label className="control-label ">
-                                    City*
-                                  </label>
-                                  <div className>
-                                    <input
-                                      id="Country"
-                                      name="Country"
-                                      type="text"
-                                      autoComplete="Address"
-                                      placeholder="City"
-                                      className="form-control"
-                                    />
-                                  </div>
-                                </div>
-                              </div>
-                              <div className="col-sm-6">
-                                {/* country select */}
-                                <div className="control-group">
-                                  <label className="control-label c">
-                                    State*
-                                  </label>
-                                  <div className>
-                                    <input
-                                      id="State"
-                                      name="State"
-                                      type="text"
-                                      autoComplete="State"
-                                      placeholder="State"
-                                      className="form-control"
-                                    />
-                                  </div>
-                                </div>
-                              </div>
-                              <div className="col-sm-6">
-                                {/* country select */}
-                                <div className="control-group">
-                                  <label className="control-label c">
-                                    Preference State
-                                  </label>
-                                  <div className>
-                                    <input
-                                      id="State"
-                                      name="State"
-                                      type="text"
-                                      autoComplete="State"
-                                      placeholder="State"
-                                      className="form-control"
-                                    />
-                                  </div>
-                                </div>
-                              </div>
-                            </>
-                          )}
-                          <div className="col-md-12 mt-3 mb-2">
-                            <button
-                              id="submit"
-                              className="default-btn"
-                              type="submit"
-                            >
-                              Submit
-                            </button>
+                            ))}
                           </div>
                         </div>
-                      </form>
-                    </div>
+
+                        <div className="col-12 col-sm-12 mt-2">
+                          <h3 className="mt-3">Select donation type</h3>
+                          <div className="d-flex gap-4">
+                            {["Donate Once", "Donate Monthly"].map((type) => (
+                              <div key={type} className="form-check form-check-inline">
+                                <input
+                                  type="radio"
+                                  name="donationType"
+                                  value={type}
+                                  checked={formData.donationType === type}
+                                  onChange={handleChange}
+                                  className="form-check-input"
+                                />
+                                <label className="form-check-label">{type}</label>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="col-12 col-sm-12 mt-2">
+                          <h3>I want my donation to be dedicated to: In Memory Of</h3>
+                        </div>
+
+                        <div className="col-12 col-sm-6 mb-2">
+                          <label>Honoree Name</label>
+                          <input
+                            name="honoreeName"
+                            type="text"
+                            placeholder="Honoree Name"
+                            className="form-control"
+                            value={formData.honoreeName}
+                            onChange={handleChange}
+                          />
+                        </div>
+
+                        <div className="col-12 col-sm-6 mb-2">
+                          <label>Relationship With</label>
+                          <input
+                            name="relationship"
+                            type="text"
+                            placeholder="Relationship With"
+                            className="form-control"
+                            value={formData.relationship}
+                            onChange={handleChange}
+                          />
+                        </div>
+
+                        <div className="col-12 col-sm-6 mb-2">
+                          <label>Occasion Name</label>
+                          <input
+                            name="occasionName"
+                            type="text"
+                            placeholder="Occasion Name"
+                            className="form-control"
+                            value={formData.occasionName}
+                            onChange={handleChange}
+                          />
+                        </div>
+
+                        <div className="col-12 col-sm-6 mb-2">
+                          <label>Occasion Date</label>
+                          <DatePicker
+                            selected={formData.occasionDate}
+                            onChange={(date) =>
+                              setFormData({ ...formData, occasionDate: date })
+                            }
+                            placeholderText="Select Date"
+                            className="form-control"
+                          />
+                        </div>
+
+                        <div className="col-12 col-sm-6 mb-2">
+                          <label>Full Name</label>
+                          <input
+                            name="fullName"
+                            type="text"
+                            placeholder="Full Name"
+                            className="form-control"
+                            value={formData.fullName}
+                            onChange={handleChange}
+                          />
+                        </div>
+
+                        <div className="col-12 col-sm-6 mb-2">
+                          <label>Email</label>
+                          <input
+                            name="email"
+                            type="email"
+                            placeholder="Email"
+                            className="form-control"
+                            value={formData.email}
+                            onChange={handleChange}
+                          />
+                        </div>
+
+                        <div className="col-12 col-sm-6 mb-2">
+                          <label>Birthdate</label>
+                          <DatePicker
+                            selected={birthdate}
+                            onChange={(date) => setBirthdate(date)}
+                            placeholderText="Select your birthdate"
+                            className="form-control"
+                          />
+                        </div>
+
+                        <div className="col-12 col-sm-6 mb-2">
+                          <label>Mobile No.*</label>
+                          <input
+                            name="mobile"
+                            type="text"
+                            placeholder="Mobile No."
+                            className="form-control"
+                            value={formData.mobile}
+                            onChange={handleChange}
+                          />
+                        </div>
+
+                        <div className="col-12 col-sm-12 mb-2">
+                          <label>Alternate Mobile No.</label>
+                          <input
+                            name="altMobile"
+                            type="text"
+                            placeholder="Alternate Mobile No."
+                            className="form-control"
+                            value={formData.altMobile}
+                            onChange={handleChange}
+                          />
+                        </div>
+
+                        <div className="col-12 col-sm-12 mb-2">
+                          <h4 className="mt-3">
+                            <input
+                              type="checkbox"
+                              checked={formData.receiveCertificate}
+                              onChange={handleCheckboxChange}
+                            />{" "}
+                            I would like to receive 80(G) Certificate
+                          </h4>
+                        </div>
+
+                        {formData.receiveCertificate && (
+                          <>
+                            <div className="col-sm-6">
+                              <label>Pan Number</label>
+                              <input
+                                name="pan"
+                                type="text"
+                                placeholder="Pan Card No."
+                                className="form-control"
+                                value={formData.pan}
+                                onChange={handleChange}
+                              />
+                            </div>
+
+                            <div className="col-sm-6">
+                              <label>Address*</label>
+                              <input
+                                name="address"
+                                type="text"
+                                placeholder="Address"
+                                className="form-control"
+                                value={formData.address}
+                                onChange={handleChange}
+                              />
+                            </div>
+
+                            <div className="col-sm-6">
+                              <label>Pin Code*</label>
+                              <input
+                                name="pinCode"
+                                type="text"
+                                placeholder="Pin Code"
+                                className="form-control"
+                                value={formData.pinCode}
+                                onChange={handleChange}
+                              />
+                            </div>
+
+                            <div className="col-sm-6">
+                              <label>City*</label>
+                              <input
+                                name="city"
+                                type="text"
+                                placeholder="City"
+                                className="form-control"
+                                value={formData.city}
+                                onChange={handleChange}
+                              />
+                            </div>
+
+                            <div className="col-sm-6">
+                              <label>State*</label>
+                              <input
+                                name="state"
+                                type="text"
+                                placeholder="State"
+                                className="form-control"
+                                value={formData.state}
+                                onChange={handleChange}
+                              />
+                            </div>
+
+                            <div className="col-sm-6">
+                              <label>Preference State</label>
+                              <input
+                                name="prefState"
+                                type="text"
+                                placeholder="Preference State"
+                                className="form-control"
+                                value={formData.prefState}
+                                onChange={handleChange}
+                              />
+                            </div>
+                          </>
+                        )}
+
+                        <div className="col-md-12 mt-3 mb-2">
+                          <button className="default-btn" type="submit">
+                            Submit
+                          </button>
+                        </div>
+                      </div>
+                    </form>
                   </div>
                 </div>
               </div>

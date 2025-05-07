@@ -9,10 +9,10 @@ function Advocacy() {
         <div className="pager-header">
           <div className="container">
             <div className="page-content">
-              <h2>About Us</h2>
+              <h2>About Us </h2>
               <p>
                 Help today because tomorrow you may be the one who <br />
-                needs more helping!{" "}
+                needs more helping!
               </p>
               <ol className="breadcrumb">
                 <li className="breadcrumb-item">

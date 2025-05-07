@@ -4,23 +4,42 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
 function DonateInHonor() {
-  const [birthdate, setBirthdate] = useState(null);
   const [formData, setFormData] = useState({
     citizenship: "Indian Citizen",
     donationType: "Donate Once",
     honoreeName: "",
     relationship: "",
+    honoreeEmail: "",
+    honoreeMobile: "",
     occasionName: "",
-    occasionDate: "",
+    occasionDate: null,
+    fullName: "",
+    email: "",
+    birthdate: null,
+    mobile: "",
+    altMobile: "",
     receiveCertificate: false,
+    pan: "",
+    address: "",
+    pinCode: "",
+    city: "",
+    state: "",
+    preferenceState: "",
   });
-  // Handle Input Change
+
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   const handleCheckboxChange = (e) => {
-    setFormData({ ...formData, receiveCertificate: e.target.checked });
+    setFormData((prev) => ({
+      ...prev,
+      receiveCertificate: e.target.checked,
+    }));
   };
 
   return (
@@ -32,7 +51,7 @@ function DonateInHonor() {
             loading="lazy"
             src="assets/images/banner/honor.webp"
             className="img-fluid"
-            alt
+            alt=""
           />
         </div>
         <section className="padding pb-5">
@@ -45,10 +64,9 @@ function DonateInHonor() {
                 <div className="panel panel-default">
                   <div className="panel-body">
                     <div className="bodyTest">
-                      <form className>
+                      <form>
                         <div className="row">
                           <div className="col-12 col-sm-12 mb-2">
-                            {/* first name input*/}
                             <h3>Select your citizenship</h3>
                             <div className="d-flex gap-4">
                               {["Indian Citizen", "Foreign National"].map(
@@ -73,7 +91,7 @@ function DonateInHonor() {
                               )}
                             </div>
                           </div>
-                          <div className="col-12  col-sm-12 mb-2">
+                          <div className="col-12 col-sm-12 mb-2">
                             <h3>
                               I want my donation to be dedicated to: In Honour
                               Of
@@ -84,194 +102,148 @@ function DonateInHonor() {
                               <label className="control-label">
                                 Occasion Date
                               </label>
-                              <div className>
-                                <DatePicker
-                                  selected={birthdate}
-                                  onChange={(date) => setBirthdate(date)}
-                                  placeholderText="Select Date"
-                                  className="form-control"
-                                />
-                                <p className="help-block" />
-                              </div>
+                              <DatePicker
+                                selected={formData.occasionDate}
+                                onChange={(date) =>
+                                  setFormData((prev) => ({
+                                    ...prev,
+                                    occasionDate: date,
+                                  }))
+                                }
+                                placeholderText="Select Date"
+                                className="form-control"
+                              />
                             </div>
                           </div>
                           <div className="col-12 col-sm-6 mb-2">
-                            <div className="control-group">
-                              <label className="control-label">
-                                Occassion Name
-                              </label>
-                              <div className>
-                                <input
-                                  id="Occassion Name"
-                                  name="Occassion Name"
-                                  type="text"
-                                  autoComplete="Occassion Name"
-                                  placeholder="Occassion Name"
-                                  className="form-control"
-                                />
-                                <p className="help-block" />
-                              </div>
-                            </div>
+                            <label className="control-label">
+                              Occasion Name
+                            </label>
+                            <input
+                              name="occasionName"
+                              value={formData.occasionName}
+                              onChange={handleChange}
+                              type="text"
+                              placeholder="Occasion Name"
+                              className="form-control"
+                            />
                           </div>
                           <div className="col-12 col-sm-6 mb-2">
-                            <div className="control-group">
-                              <label className="control-label">
-                                Honoree Name
-                              </label>
-                              <div className>
-                                <input
-                                  id="number"
-                                  name="number"
-                                  type="text"
-                                  autoComplete="Honoree"
-                                  placeholder="Honoree Name"
-                                  className="form-control"
-                                />
-                              </div>
-                            </div>
-                          </div>
-                          {/* address-line1 input*/}
-                          <div className="col-12 col-sm-6 mb-2">
-                            <div className="control-group">
-                              <label className="control-label">
-                                Relationship With
-                              </label>
-                              <div className=" ">
-                                <input
-                                  id="address"
-                                  name="address"
-                                  type="text"
-                                  autoComplete="address"
-                                  placeholder="Relationship With"
-                                  className="form-control"
-                                />
-                              </div>
-                            </div>
+                            <label className="control-label">
+                              Honoree Name
+                            </label>
+                            <input
+                              name="honoreeName"
+                              value={formData.honoreeName}
+                              onChange={handleChange}
+                              type="text"
+                              placeholder="Honoree Name"
+                              className="form-control"
+                            />
                           </div>
                           <div className="col-12 col-sm-6 mb-2">
-                            <div className="control-group">
-                              <label className="control-label">
-                                Honoree Email Id
-                              </label>
-                              <div className=" ">
-                                <input
-                                  id="address"
-                                  name="address"
-                                  type="text"
-                                  autoComplete="address"
-                                  placeholder="Honoree Email Id"
-                                  className="form-control"
-                                />
-                              </div>
-                            </div>
+                            <label className="control-label">
+                              Relationship With
+                            </label>
+                            <input
+                              name="relationship"
+                              value={formData.relationship}
+                              onChange={handleChange}
+                              type="text"
+                              placeholder="Relationship With"
+                              className="form-control"
+                            />
                           </div>
                           <div className="col-12 col-sm-6 mb-2">
-                            <div className="control-group">
-                              <label className="control-label">
-                                Honoree Mobile No.
-                              </label>
-                              <div className=" ">
-                                <input
-                                  id="address"
-                                  name="address"
-                                  type="text"
-                                  autoComplete="address"
-                                  placeholder="Honoree Mobile No."
-                                  className="form-control"
-                                />
-                              </div>
-                            </div>
+                            <label className="control-label">
+                              Honoree Email Id
+                            </label>
+                            <input
+                              name="honoreeEmail"
+                              value={formData.honoreeEmail}
+                              onChange={handleChange}
+                              type="email"
+                              placeholder="Honoree Email Id"
+                              className="form-control"
+                            />
+                          </div>
+                          <div className="col-12 col-sm-6 mb-2">
+                            <label className="control-label">
+                              Honoree Mobile No.
+                            </label>
+                            <input
+                              name="honoreeMobile"
+                              value={formData.honoreeMobile}
+                              onChange={handleChange}
+                              type="text"
+                              placeholder="Honoree Mobile No."
+                              className="form-control"
+                            />
                           </div>
 
                           <div className="col-12 col-sm-12 mt-2">
                             <h3>Personal Details</h3>
                           </div>
 
-                          <div className="col-12 col-sm-6">
-                            <div className="control-group">
-                              <label className="control-label ">
-                                Full Name
-                              </label>
-                              <div className>
-                                <input
-                                  id="Full Name"
-                                  name="Full Name"
-                                  type="text"
-                                  autoComplete="Full Name"
-                                  placeholder="Full Name"
-                                  className="form-control"
-                                />
-                                <p className="help-block" />
-                              </div>
-                            </div>
+                          <div className="col-12 col-sm-6 mb-2">
+                            <label className="control-label">Full Name</label>
+                            <input
+                              name="fullName"
+                              value={formData.fullName}
+                              onChange={handleChange}
+                              type="text"
+                              placeholder="Full Name"
+                              className="form-control"
+                            />
                           </div>
                           <div className="col-12 col-sm-6 mb-2">
-                            {/* country select */}
-                            <div className="control-group">
-                              <label className="control-label">Email</label>
-                              <div className>
-                                <input
-                                  id="Email"
-                                  name="Email"
-                                  type="text"
-                                  autoComplete="Email"
-                                  placeholder="Email"
-                                  className="form-control"
-                                />
-                              </div>
-                            </div>
+                            <label className="control-label">Email</label>
+                            <input
+                              name="email"
+                              value={formData.email}
+                              onChange={handleChange}
+                              type="email"
+                              placeholder="Email"
+                              className="form-control"
+                            />
                           </div>
                           <div className="col-12 col-sm-6 mb-2">
-                            {/* country select */}
-                            <div className="control-group">
-                              <label className="control-label ">
-                                Birthdate
-                              </label>
-                              <div className>
-                                <DatePicker
-                                  selected={birthdate}
-                                  onChange={(date) => setBirthdate(date)}
-                                  placeholderText="Select your birthdate"
-                                  className="form-control"
-                                />
-                              </div>
-                            </div>
+                            <label className="control-label">Birthdate</label>
+                            <DatePicker
+                              selected={formData.birthdate}
+                              onChange={(date) =>
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  birthdate: date,
+                                }))
+                              }
+                              placeholderText="Select your birthdate"
+                              className="form-control"
+                            />
                           </div>
                           <div className="col-12 col-sm-6 mb-2">
-                            {/* country select */}
-                            <div className="control-group">
-                              <label className="control-label ">
-                                Mobile No.*
-                              </label>
-                              <div className>
-                                <input
-                                  id="Mobile No"
-                                  name="Mobile No"
-                                  type="text"
-                                  autoComplete="Mobile No"
-                                  placeholder="Mobile No.*"
-                                  className="form-control"
-                                />
-                              </div>
-                            </div>
+                            <label className="control-label">Mobile No.*</label>
+                            <input
+                              name="mobile"
+                              value={formData.mobile}
+                              onChange={handleChange}
+                              type="text"
+                              placeholder="Mobile No.*"
+                              className="form-control"
+                            />
                           </div>
                           <div className="col-12 col-sm-12 mb-2">
-                            {/* country select */}
-                            <div className="control-group">
-                              <label className="control-label ">
-                                Alternate Mobile No.
-                              </label>
-                              <div className>
-                                <input
-                                  id="Country"
-                                  name="Country"
-                                  type="text"
-                                  autoComplete="Address"
-                                  placeholder="Mobile Number"
-                                  className="form-control"
-                                />
-                              </div>
-                            </div>
+                            <label className="control-label">
+                              Alternate Mobile No.
+                            </label>
+                            <input
+                              name="altMobile"
+                              value={formData.altMobile}
+                              onChange={handleChange}
+                              type="text"
+                              placeholder="Mobile Number"
+                              className="form-control"
+                            />
                           </div>
                           <div className="col-12 col-sm-12 mb-2">
                             <h4 className="mt-3">
@@ -283,115 +255,76 @@ function DonateInHonor() {
                               I would like to receive 80(G) Certificate
                             </h4>
                           </div>
+
                           {formData.receiveCertificate && (
                             <>
                               <div className="col-sm-6">
-                                {/* country select */}
-                                <div className="control-group">
-                                  <label className="control-label ">
-                                    Pan Number
-                                  </label>
-                                  <div className>
-                                    <input
-                                      id="Country"
-                                      name="Country"
-                                      type="text"
-                                      autoComplete="Address"
-                                      placeholder="Pan Card No."
-                                      className="form-control"
-                                    />
-                                  </div>
-                                </div>
+                                <label className="control-label">Pan Number</label>
+                                <input
+                                  name="pan"
+                                  value={formData.pan}
+                                  onChange={handleChange}
+                                  type="text"
+                                  placeholder="Pan Card No."
+                                  className="form-control"
+                                />
                               </div>
                               <div className="col-sm-6">
-                                {/* country select */}
-                                <div className="control-group">
-                                  <label className="control-label ">
-                                    Address*
-                                  </label>
-                                  <div className>
-                                    <input
-                                      id="Address"
-                                      name="Address"
-                                      type="text"
-                                      autoComplete="Address"
-                                      placeholder="Address"
-                                      className="form-control"
-                                    />
-                                  </div>
-                                </div>
+                                <label className="control-label">Address*</label>
+                                <input
+                                  name="address"
+                                  value={formData.address}
+                                  onChange={handleChange}
+                                  type="text"
+                                  placeholder="Address"
+                                  className="form-control"
+                                />
                               </div>
                               <div className="col-sm-6">
-                                {/* country select */}
-                                <div className="control-group">
-                                  <label className="control-label ">
-                                    Pin Code*
-                                  </label>
-                                  <div className>
-                                    <input
-                                      id="Pin Code"
-                                      name="Pin Code"
-                                      type="text"
-                                      autoComplete="Pin Code"
-                                      placeholder="Pin Code"
-                                      className="form-control"
-                                    />
-                                  </div>
-                                </div>
+                                <label className="control-label">Pin Code*</label>
+                                <input
+                                  name="pinCode"
+                                  value={formData.pinCode}
+                                  onChange={handleChange}
+                                  type="text"
+                                  placeholder="Pin Code"
+                                  className="form-control"
+                                />
                               </div>
                               <div className="col-sm-6">
-                                {/* country select */}
-                                <div className="control-group">
-                                  <label className="control-label ">
-                                    City*
-                                  </label>
-                                  <div className>
-                                    <input
-                                      id="Country"
-                                      name="Country"
-                                      type="text"
-                                      autoComplete="Address"
-                                      placeholder="City"
-                                      className="form-control"
-                                    />
-                                  </div>
-                                </div>
+                                <label className="control-label">City*</label>
+                                <input
+                                  name="city"
+                                  value={formData.city}
+                                  onChange={handleChange}
+                                  type="text"
+                                  placeholder="City"
+                                  className="form-control"
+                                />
                               </div>
                               <div className="col-sm-6">
-                                {/* country select */}
-                                <div className="control-group">
-                                  <label className="control-label c">
-                                    State*
-                                  </label>
-                                  <div className>
-                                    <input
-                                      id="State"
-                                      name="State"
-                                      type="text"
-                                      autoComplete="State"
-                                      placeholder="State"
-                                      className="form-control"
-                                    />
-                                  </div>
-                                </div>
+                                <label className="control-label">State*</label>
+                                <input
+                                  name="state"
+                                  value={formData.state}
+                                  onChange={handleChange}
+                                  type="text"
+                                  placeholder="State"
+                                  className="form-control"
+                                />
                               </div>
                               <div className="col-sm-6">
-                                {/* country select */}
-                                <div className="control-group">
-                                  <label className="control-label c">
-                                    Preference State
-                                  </label>
-                                  <div className>
-                                    <input
-                                      id="State"
-                                      name="State"
-                                      type="text"
-                                      autoComplete="State"
-                                      placeholder="State"
-                                      className="form-control"
-                                    />
-                                  </div>
-                                </div>
+                                <label className="control-label">
+                                  Preference State
+                                </label>
+                                <input
+                                  name="preferenceState"
+                                  value={formData.preferenceState}
+                                  onChange={handleChange}
+                                  type="text"
+                                  placeholder="State"
+                                  className="form-control"
+                                />
                               </div>
                             </>
                           )}

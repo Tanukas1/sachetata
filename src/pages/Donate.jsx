@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 import Layout from "../layout/Layout";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -8,6 +9,7 @@ import axios from "axios";
 
 function Donate() {
   const [birthdate, setBirthdate] = useState(null);
+  const navigate = useNavigate(); // Initialize useNavigate
 
   const initialFormData = {
     citizenship: "",
@@ -75,7 +77,6 @@ function Donate() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-
     if (!formData.fullName || !formData.email || !formData.mobileNumber) {
       toast.error("Please fill all required fields.");
       return;
@@ -96,6 +97,7 @@ function Donate() {
       );
       return;
     }
+
     const finalData = {
       ...formData,
       birthdate: birthdate ? formatDateOnly(birthdate) : null,
@@ -104,7 +106,7 @@ function Donate() {
 
     try {
       const response = await axios.post(
-        "http://sucheta.traficoanalytica.com/api/v1/enquiry/add-dedicate-donation",
+        "https://sucheta.traficoanalytica.com/api/v1/enquiry/add-dedicate-donation",
         finalData,
         {
           headers: {
@@ -114,7 +116,11 @@ function Donate() {
       );
 
       if (response.status === 200 || response.status === 201) {
-        toast.success("Donation form submitted successfully!");
+        toast.success("Donation form submitted successfully!", {
+          onClose: () => {
+            navigate("/thank-you");
+          },
+        });
         setFormData(initialFormData);
         setBirthdate(null);
       } else {

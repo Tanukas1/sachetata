@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 import Layout from "../layout/Layout";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -8,6 +9,7 @@ import axios from "axios";
 
 function Sponsor() {
   const [birthdate, setBirthdate] = useState(null);
+  const navigate = useNavigate(); // Initialize useNavigate
 
   const initialFormData = {
     citizenship: "",
@@ -67,6 +69,7 @@ function Sponsor() {
   };
 
   const handleDateChange = (date) => {
+    setBirthdate(date); // Update birthdate state
     setFormData((prev) => ({
       ...prev,
       birthdate: date,
@@ -81,11 +84,25 @@ function Sponsor() {
       return;
     }
 
+    const mobileRegex = /^[0-9]{10,13}$/;
+    if (!mobileRegex.test(formData.mobileNumber)) {
+      toast.error("Enter a valid Mobile Number (10-13 digits).");
+      return;
+    }
+
+    if (
+      formData.alternateMobileNumber &&
+      !mobileRegex.test(formData.alternateMobileNumber)
+    ) {
+      toast.error(
+        "Enter a valid Alternate Mobile Number (10-13 digits) or leave it blank."
+      );
+      return;
+    }
+
     const finalData = {
       ...formData,
-      birthdate: formData.birthdate
-        ? formData.birthdate.toISOString().split("T")[0]
-        : null,
+      birthdate: birthdate ? birthdate.toISOString().split("T")[0] : null,
     };
 
     // Log the final data before sending
@@ -93,7 +110,7 @@ function Sponsor() {
 
     try {
       const response = await axios.post(
-        "http://sucheta.traficoanalytica.com/api/v1/enquiry/add-in-sponsor-donation",
+        "https://sucheta.traficoanalytica.com/api/v1/enquiry/add-in-sponsor-donation",
         finalData,
         {
           headers: {
@@ -103,7 +120,12 @@ function Sponsor() {
       );
 
       if (response.status === 200 || response.status === 201) {
-        toast.success("Donation form submitted successfully!");
+        toast.success("Donation form submitted successfully!", {
+          autoClose: 3000, 
+          onClose: () => {
+            navigate("/thank-you");
+          },
+        });
         setFormData(initialFormData);
         setBirthdate(null);
       } else {
@@ -193,7 +215,7 @@ function Sponsor() {
               <div className="col-sm-6 mb-2">
                 <label>Birthdate</label>
                 <DatePicker
-                  selected={formData.birthdate}
+                  selected={birthdate}
                   onChange={handleDateChange}
                   placeholderText="Select your birthdate"
                   className="form-control"

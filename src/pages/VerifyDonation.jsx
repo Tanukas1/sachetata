@@ -1,4 +1,5 @@
 import React, { useState, useRef } from "react";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 import Layout from "../layout/Layout";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -14,6 +15,7 @@ function VerifyDonation() {
   });
 
   const donationScreenshotRef = useRef(null); // Create a reference for the file input
+  const navigate = useNavigate(); // Initialize useNavigate
 
   const handleChange = (e) => {
     const { name, value, type, files } = e.target;
@@ -76,7 +78,7 @@ function VerifyDonation() {
       formDataToSend.append("donationScreenshot", donationScreenshot);
 
       const res = await axios.post(
-        "http://sucheta.traficoanalytica.com/api/v1/enquiry/add-verify-donation",
+        "https://sucheta.traficoanalytica.com/api/v1/enquiry/add-verify-donation",
         formDataToSend,
         {
           headers: {
@@ -86,7 +88,13 @@ function VerifyDonation() {
       );
 
       if (res.status === 201) {
-        toast.success("Verify Donation form submitted successfully!");
+        toast.success("Verify Donation form submitted successfully!", {
+          autoClose: 3000, // 3 seconds
+          onClose: () => {
+            // Redirect to Thank You page after toast closes
+            navigate("/thank-you");
+          },
+        });
         setFormData({
           firstName: "",
           email: "",
@@ -133,6 +141,7 @@ function VerifyDonation() {
                     placeholder="First Name"
                     value={formData.firstName}
                     onChange={handleChange}
+                    required
                   />
                 </div>
                 <div className="col-sm-6 mb-3">
@@ -144,6 +153,7 @@ function VerifyDonation() {
                     placeholder="Email"
                     value={formData.email}
                     onChange={handleChange}
+                    required
                   />
                 </div>
                 <div className="col-sm-6 mb-3">
@@ -174,6 +184,7 @@ function VerifyDonation() {
                     placeholder="Donation Amount Paid"
                     value={formData.donationAmount}
                     onChange={handleChange}
+                    required
                   />
                 </div>
                 <div className="col-sm-12 mb-4">
@@ -186,7 +197,8 @@ function VerifyDonation() {
                     id="donationScreenshot"
                     className="form-control"
                     onChange={handleChange}
-                    ref={donationScreenshotRef} // Attach the ref
+                    ref={donationScreenshotRef}
+                    required
                   />
                 </div>
                 <div className="col-sm-12">

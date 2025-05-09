@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 import Layout from "../layout/Layout";
 import { FaInfoCircle } from "react-icons/fa";
 import DatePicker from "react-datepicker";
@@ -9,6 +10,8 @@ import axios from "axios";
 
 function Occasional() {
   const [birthdate, setBirthdate] = useState(null);
+  const [occasionDate, setOccasionDate] = useState(null); // Separate state for occasionDate
+  const navigate = useNavigate(); // Initialize useNavigate
 
   const initialFormData = {
     citizenship: "",
@@ -16,7 +19,7 @@ function Occasional() {
     honoreeName: "",
     relationshipWithHonoree: "",
     occasionName: "",
-    occasionDate: null, 
+    occasionDate: null,
     fullName: "",
     email: "",
     birthdate: null,
@@ -71,6 +74,7 @@ function Occasional() {
   };
 
   const formatDateOnly = (date) => {
+    if (!date) return null;
     const d = new Date(date);
     const year = d.getFullYear();
     const month = String(d.getMonth() + 1).padStart(2, "0");
@@ -86,23 +90,37 @@ function Occasional() {
       !formData.email ||
       !formData.mobileNumber ||
       !formData.honoreeName ||
-      !formData.occasionDate
+      !occasionDate
     ) {
       toast.error("Please fill all required fields.");
       return;
     }
 
+    const mobileRegex = /^[0-9]{10,13}$/;
+    if (!mobileRegex.test(formData.mobileNumber)) {
+      toast.error("Enter a valid Mobile Number (10-13 digits).");
+      return;
+    }
+
+    if (
+      formData.alternateMobileNumber &&
+      !mobileRegex.test(formData.alternateMobileNumber)
+    ) {
+      toast.error(
+        "Enter a valid Alternate Mobile Number (10-13 digits) or leave it blank."
+      );
+      return;
+    }
+
     const finalData = {
       ...formData,
-      birthdate: formData.birthdate ? formatDateOnly(formData.birthdate) : null,
-      occasionDate: formData.occasionDate
-        ? formatDateOnly(formData.occasionDate)
-        : null,
+      birthdate: birthdate ? formatDateOnly(birthdate) : null,
+      occasionDate: occasionDate ? formatDateOnly(occasionDate) : null,
     };
 
     try {
       const response = await axios.post(
-        "http://sucheta.traficoanalytica.com/api/v1/enquiry/add-special-occasion-donation",
+        "https://sucheta.traficoanalytica.com/api/v1/enquiry/add-special-occasion-donation",
         finalData,
         {
           headers: {
@@ -112,9 +130,15 @@ function Occasional() {
       );
 
       if (response.status === 200 || response.status === 201) {
-        toast.success("Donation form submitted successfully!");
+        toast.success("Donation form submitted successfully!", {
+          autoClose: 3000,
+          onClose: () => {
+            navigate("/thank-you");
+          },
+        });
         setFormData(initialFormData);
         setBirthdate(null);
+        setOccasionDate(null);
       } else {
         toast.error("Something went wrong while submitting the form.");
       }
@@ -175,6 +199,7 @@ function Occasional() {
                                     checked={formData.citizenship === type}
                                     onChange={handleChange}
                                     className="form-check-input"
+                                    required
                                   />
                                   <label className="form-check-label">
                                     {type}
@@ -199,6 +224,7 @@ function Occasional() {
                                     checked={formData.donationType === type}
                                     onChange={handleChange}
                                     className="form-check-input"
+                                    required
                                   />
                                   <label className="form-check-label">
                                     {type}
@@ -228,6 +254,7 @@ function Occasional() {
                                 onChange={handleChange}
                                 placeholder="Honoree Name"
                                 className="form-control"
+                                required
                               />
                             </div>
                           </div>
@@ -251,14 +278,14 @@ function Occasional() {
                           <div className="col-12 col-sm-6 mb-3">
                             <div className="control-group">
                               <label className="control-label">
-                                Occassion Name
+                                Occasion Name
                               </label>
                               <input
                                 name="occasionName"
                                 type="text"
                                 value={formData.occasionName}
                                 onChange={handleChange}
-                                placeholder="Occassion Name"
+                                placeholder="Occasion Name"
                                 className="form-control"
                               />
                             </div>
@@ -268,18 +295,14 @@ function Occasional() {
                           <div className="col-12 col-sm-6 mb-3">
                             <div className="control-group">
                               <label className="control-label">
-                                Occassion Date
+                                Occasion Date
                               </label>
                               <DatePicker
-                                selected={formData.occasionDate}
-                                onChange={(date) =>
-                                  setFormData({
-                                    ...formData,
-                                    occasionDate: date,
-                                  })
-                                }
-                                placeholderText="Select Occassion Date"
+                                selected={occasionDate}
+                                onChange={(date) => setOccasionDate(date)}
+                                placeholderText="Select Occasion Date"
                                 className="form-control"
+                                required
                               />
                             </div>
                           </div>
@@ -295,6 +318,7 @@ function Occasional() {
                                 onChange={handleChange}
                                 placeholder="Full Name"
                                 className="form-control"
+                                required
                               />
                             </div>
                           </div>
@@ -310,6 +334,7 @@ function Occasional() {
                                 onChange={handleChange}
                                 placeholder="Email"
                                 className="form-control"
+                                required
                               />
                             </div>
                           </div>
@@ -319,10 +344,8 @@ function Occasional() {
                             <div className="control-group">
                               <label className="control-label">Birthdate</label>
                               <DatePicker
-                                selected={formData.birthdate}
-                                onChange={(date) =>
-                                  setFormData({ ...formData, birthdate: date })
-                                }
+                                selected={birthdate}
+                                onChange={(date) => setBirthdate(date)}
                                 placeholderText="Select Your Birthdate"
                                 className="form-control"
                               />
@@ -342,7 +365,7 @@ function Occasional() {
                                 onChange={handleChange}
                                 placeholder="Mobile Number"
                                 className="form-control"
-                                pattern="^[0-9]{10,13}$"
+                                pattern="[0-9]{10,13}"
                                 minLength={10}
                                 maxLength={13}
                                 required
@@ -369,7 +392,7 @@ function Occasional() {
                                 onChange={handleChange}
                                 placeholder="Alternate Mobile Number"
                                 className="form-control"
-                                pattern="^[0-9]{10,13}$"
+                                pattern="[0-9]{10,13}"
                                 minLength={10}
                                 maxLength={13}
                                 onInput={(e) => {

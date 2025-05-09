@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 import Layout from "../layout/Layout";
 import { FaInfoCircle } from "react-icons/fa";
 import DatePicker from "react-datepicker";
@@ -10,6 +11,7 @@ import axios from "axios";
 function DonateInMemory() {
   const [occasionDate, setOccasionDate] = useState(null);
   const [birthdate, setBirthdate] = useState(null);
+  const navigate = useNavigate(); // Initialize useNavigate
 
   const initialFormData = {
     citizenship: "",
@@ -86,14 +88,30 @@ function DonateInMemory() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.fullName || !formData.email || !formData.mobileNumber) {
+    if (
+      !formData.fullName ||
+      !formData.email ||
+      !formData.mobileNumber ||
+      !formData.honoreeName ||
+      !occasionDate
+    ) {
       toast.error("Please fill all required fields.");
       return;
     }
 
-    const digitsOnly = formData.mobileNumber.replace(/\D/g, "");
-    if (digitsOnly.length < 10 || digitsOnly.length > 13) {
-      toast.error("Contact number must be between 10 and 13 digits.");
+    const mobileRegex = /^[0-9]{10,13}$/;
+    if (!mobileRegex.test(formData.mobileNumber)) {
+      toast.error("Enter a valid Mobile Number (10-13 digits).");
+      return;
+    }
+
+    if (
+      formData.alternateMobileNumber &&
+      !mobileRegex.test(formData.alternateMobileNumber)
+    ) {
+      toast.error(
+        "Enter a valid Alternate Mobile Number (10-13 digits) or leave it blank."
+      );
       return;
     }
 
@@ -106,7 +124,7 @@ function DonateInMemory() {
 
     try {
       const response = await axios.post(
-        "http://sucheta.traficoanalytica.com/api/v1/enquiry/add-in-memory-donation",
+        "https://sucheta.traficoanalytica.com/api/v1/enquiry/add-in-memory-donation",
         finalData,
         {
           headers: {
@@ -116,7 +134,12 @@ function DonateInMemory() {
       );
 
       if (response.status === 200 || response.status === 201) {
-        toast.success("Donation form submitted successfully!");
+        toast.success("Donation form submitted successfully!", {
+          autoClose: 3000,
+          onClose: () => {
+            navigate("/thank-you");
+          },
+        });
         setFormData(initialFormData);
         setBirthdate(null);
         setOccasionDate(null);
@@ -178,6 +201,7 @@ function DonateInMemory() {
                                   checked={formData.citizenship === type}
                                   onChange={handleChange}
                                   className="form-check-input"
+                                  required
                                 />
                                 <label className="form-check-label">
                                   {type}
@@ -202,6 +226,7 @@ function DonateInMemory() {
                                   checked={formData.donationType === type}
                                   onChange={handleChange}
                                   className="form-check-input"
+                                  required
                                 />
                                 <label className="form-check-label">
                                   {type}
@@ -211,7 +236,7 @@ function DonateInMemory() {
                           </div>
                         </div>
 
-                        <div className="col-12 col-sm-12 mt-2">
+                        <div className="col- Nbcol-12 col-sm-12 mt-2">
                           <h3>
                             I want my donation to be dedicated to: In Memory Of
                           </h3>
@@ -226,6 +251,7 @@ function DonateInMemory() {
                             className="form-control"
                             value={formData.honoreeName}
                             onChange={handleChange}
+                            required
                           />
                         </div>
 
@@ -242,11 +268,11 @@ function DonateInMemory() {
                         </div>
 
                         <div className="col-12 col-sm-6 mb-2">
-                          <label>Occassion Name</label>
+                          <label>Occasion Name</label>
                           <input
                             name="occasionName"
                             type="text"
-                            placeholder="Occassion Name"
+                            placeholder="Occasion Name"
                             className="form-control"
                             value={formData.occasionName}
                             onChange={handleChange}
@@ -254,12 +280,13 @@ function DonateInMemory() {
                         </div>
 
                         <div className="col-12 col-sm-6 mb-2">
-                          <label>Occassion Date</label>
+                          <label>Occasion Date</label>
                           <DatePicker
                             selected={occasionDate}
                             onChange={(date) => setOccasionDate(date)}
                             placeholderText="Select Date"
                             className="form-control"
+                            required
                           />
                         </div>
 
@@ -272,6 +299,7 @@ function DonateInMemory() {
                             className="form-control"
                             value={formData.fullName}
                             onChange={handleChange}
+                            required
                           />
                         </div>
 
@@ -284,6 +312,7 @@ function DonateInMemory() {
                             className="form-control"
                             value={formData.email}
                             onChange={handleChange}
+                            required
                           />
                         </div>
 
@@ -314,6 +343,7 @@ function DonateInMemory() {
                                 ""
                               );
                             }}
+                            required
                           />
                         </div>
 
@@ -326,7 +356,7 @@ function DonateInMemory() {
                             className="form-control"
                             value={formData.alternateMobileNumber}
                             onChange={handleChange}
-                            pattern="[0-9]{10}"
+                            pattern="[0-9]{10,13}"
                             maxLength={13}
                             onInput={(e) => {
                               e.target.value = e.target.value.replace(
@@ -414,7 +444,7 @@ function DonateInMemory() {
                                 placeholder="State"
                                 className="form-control"
                                 value={
-                                  formData.certificateDetails.certificateState
+                                  formData.certificateDetails.chruertificateState
                                 }
                                 onChange={handleChange}
                                 required
@@ -429,7 +459,7 @@ function DonateInMemory() {
                                 className="form-control"
                                 value={
                                   formData.certificateDetails.preferenceState
-                                } 
+                                }
                                 onChange={handleChange}
                               />
                             </div>

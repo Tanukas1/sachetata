@@ -1,368 +1,365 @@
 import React, { useState } from "react";
 import Layout from "../layout/Layout";
-import { FaInfoCircle } from "react-icons/fa";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import axios from "axios";
 
 function Sponsor() {
   const [birthdate, setBirthdate] = useState(null);
-  const [formData, setFormData] = useState({
-    citizenship: "Indian Citizen",
-    donationType: "Donate Once",
-    receiveCertificate: false,
+
+  const initialFormData = {
+    citizenship: "",
     fullName: "",
     email: "",
     panNumber: "",
-    mobileNo: "",
-    alternateMobileNo: "",
+    mobileNumber: "",
+    alternateMobileNumber: "",
     pinCode: "",
     address: "",
-    city: "",
-    state: "",
-    preferenceState: "",
-  });
+    wants80GCertificate: false,
+    certificateDetails: {
+      panCardNumber: "",
+      certificateAddress: "",
+      certificatePinCode: "",
+      certificateCity: "",
+      certificateState: "",
+      preferenceState: "",
+    },
+  };
 
-  // Handle Input Change
+  const [formData, setFormData] = useState(initialFormData);
+
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+
+    if (
+      [
+        "panCardNumber",
+        "certificateAddress",
+        "certificatePinCode",
+        "certificateCity",
+        "certificateState",
+        "preferenceState",
+      ].includes(name)
+    ) {
+      setFormData((prev) => ({
+        ...prev,
+        certificateDetails: {
+          ...prev.certificateDetails,
+          [name]: value,
+        },
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
   };
 
-  // Handle Checkbox Change
   const handleCheckboxChange = (e) => {
-    setFormData({ ...formData, receiveCertificate: e.target.checked });
+    setFormData((prev) => ({
+      ...prev,
+      wants80GCertificate: e.target.checked,
+    }));
   };
 
-  // Handle Date Change
   const handleDateChange = (date) => {
-    setBirthdate(date);
+    setFormData((prev) => ({
+      ...prev,
+      birthdate: date,
+    }));
   };
 
-  // Handle Submit
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(formData); // Replace this with API call to submit data
+
+    if (!formData.fullName || !formData.email || !formData.mobileNumber) {
+      toast.error("Please fill in all required fields.");
+      return;
+    }
+
+    const finalData = {
+      ...formData,
+      birthdate: formData.birthdate
+        ? formData.birthdate.toISOString().split("T")[0]
+        : null,
+    };
+
+    // Log the final data before sending
+    console.log("Final Data to be sent:", finalData);
+
+    try {
+      const response = await axios.post(
+        "http://sucheta.traficoanalytica.com/api/v1/enquiry/add-in-sponsor-donation",
+        finalData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.status === 200 || response.status === 201) {
+        toast.success("Donation form submitted successfully!");
+        setFormData(initialFormData);
+        setBirthdate(null);
+      } else {
+        toast.error("Something went wrong while submitting the form.");
+      }
+    } catch (error) {
+      console.error("Axios Error:", error);
+      if (error.response) {
+        toast.error(error.response.data?.message || "Server error occurred.");
+      } else if (error.request) {
+        toast.error("No response from server.");
+      } else {
+        toast.error("Request error: " + error.message);
+      }
+    }
   };
 
   return (
     <Layout>
-      <div>
-        <div className="header-height" />
-        <div>
-          <img
-            loading="lazy"
-            src="assets/images/banner/sponsor.webp"
-            className="img-fluid"
-            alt="Sponsor Banner"
-          />
-        </div>
-        <section className="pt-5 pb-5">
-          <div className="container">
-            <div className="section-heading text-center mb-40">
-              <h2>Sponsor a School Through Your Donation</h2>
-            </div>
+      <ToastContainer />
+      <div className="header-height" />
+      <img
+        src="assets/images/banner/sponsor.webp"
+        className="img-fluid"
+        alt="Sponsor Banner"
+        loading="lazy"
+      />
+      <section className="pt-5 pb-5">
+        <div className="container">
+          <div className="section-heading text-center mb-40">
+            <h2>Sponsor a School Through Your Donation</h2>
+          </div>
+
+          <form onSubmit={handleSubmit}>
             <div className="row frm">
-              <div className="col-xs-12 col-md-12">
-                <div className="panel panel-default">
-                  <div className="panel-body">
-                    <div className="bodyTest">
-                      <form onSubmit={handleSubmit}>
-                        <div className="row">
-                          <div className="col-12 col-sm-12">
-                            {/* Citizenship Selection */}
-                            <h3>Select your citizenship</h3>
-                            <div className="d-flex flex-wrap gap-3">
-                              {["Indian Citizen", "Foreign National"].map(
-                                (type) => (
-                                  <div
-                                    key={type}
-                                    className="form-check form-check-inline"
-                                  >
-                                    <input
-                                      type="radio"
-                                      name="citizenship"
-                                      value={type}
-                                      checked={formData.citizenship === type}
-                                      onChange={handleChange}
-                                      className="form-check-input"
-                                    />
-                                    <label className="form-check-label">
-                                      {type}
-                                    </label>
-                                  </div>
-                                )
-                              )}
-                            </div>
-                          </div>
-                          <div class="col-12 col-sm-12">
-                            <h3 class="mt-3">I want to dedicate my donation in memory of someone</h3>
-                          </div>
-                          {/* Full Name */}
-                          <div className="col-12 col-sm-6 mb-3">
-                            <div className="control-group">
-                              <label className="control-label ">Full Name</label>
-                              <div>
-                                <input
-                                  name="fullName"
-                                  type="text"
-                                  value={formData.fullName}
-                                  onChange={handleChange}
-                                  placeholder="Full Name"
-                                  className="form-control"
-                                />
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Email */}
-                          <div className="col-12 col-sm-6 mb-3">
-                            <div className="control-group">
-                              <label className="control-label">Email</label>
-                              <div>
-                                <input
-                                  name="email"
-                                  type="email"
-                                  value={formData.email}
-                                  onChange={handleChange}
-                                  placeholder="Email"
-                                  className="form-control"
-                                />
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Birthdate */}
-                          <div className="col-12 col-sm-6 mb-3">
-                            <div className="control-group">
-                              <label className="control-label ">Birthdate</label>
-                              <div>
-                                <DatePicker
-                                  selected={birthdate}
-                                  onChange={handleDateChange}
-                                  placeholderText="Select your birthdate"
-                                  className="form-control"
-                                />
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Pan Number */}
-                          <div className="col-12 col-sm-6 mb-3">
-                            <div className="control-group">
-                              <label className="control-label ">Pan Number</label>
-                              <div>
-                                <input
-                                  name="panNumber"
-                                  type="text"
-                                  value={formData.panNumber}
-                                  onChange={handleChange}
-                                  placeholder="Pan card no."
-                                  className="form-control"
-                                />
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Mobile Number */}
-                          <div className="col-12 col-sm-6 mb-3">
-                            <div className="control-group">
-                              <label className="control-label ">Mobile No.*</label>
-                              <div>
-                                <input
-                                  name="mobileNo"
-                                  type="text"
-                                  value={formData.mobileNo}
-                                  onChange={handleChange}
-                                  placeholder="Mobile No.*"
-                                  className="form-control"
-                                />
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Alternate Mobile No. */}
-                          <div className="col-12 col-sm-6 mb-3">
-                            <div className="control-group">
-                              <label className="control-label ">Alternate Mobile No.</label>
-                              <div>
-                                <input
-                                  name="alternateMobileNo"
-                                  type="text"
-                                  value={formData.alternateMobileNo}
-                                  onChange={handleChange}
-                                  placeholder="Alternate Mobile No."
-                                  className="form-control"
-                                />
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Pin Code */}
-                          <div className="col-12 col-sm-6 mb-3">
-                            <div className="control-group">
-                              <label className="control-label">Pin Code</label>
-                              <div>
-                                <input
-                                  name="pinCode"
-                                  type="text"
-                                  value={formData.pinCode}
-                                  onChange={handleChange}
-                                  placeholder="Enter Pin Code"
-                                  className="form-control"
-                                />
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Address */}
-                          
-                          <div className="col-12 col-sm-6 mb-3">
-                            <div className="control-group">
-                              <label className="control-label">Address</label>
-                              <div>
-                                <input
-                                  name="address"
-                                  type="text"
-                                  value={formData.address}
-                                  onChange={handleChange}
-                                  placeholder="Enter Address"
-                                  className="form-control"
-                                />
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Receive Certificate Checkbox */}
-                          <div className="col-12 col-sm-12 mb-3">
-                            <h4 className="mt-3">
-                              <input
-                                type="checkbox"
-                                checked={formData.receiveCertificate}
-                                onChange={handleCheckboxChange}
-                              />{" "}
-                              I would like to receive 80(G) Certificate
-                            </h4>
-                          </div>
-
-                          {/* Conditional Fields for Certificate */}
-                          {formData.receiveCertificate && (
-                            <>
-                              <div className="col-sm-6 mb-2">
-                                <div className="control-group">
-                                  <label className="control-label ">Pan Number</label>
-                                  <div>
-                                  <input
-                                    name="panNumber" 
-                                    type="text"
-                                    value={formData.panNumber}
-                                    onChange={handleChange}
-                                    placeholder="Pan Card No."
-                                    className="form-control"
-                                  />
-                                  </div>
-                                </div>
-                              </div>
-                              <div className="col-sm-6 mb-2">
-                                <div className="control-group">
-                                  <label className="control-label ">Address*</label>
-                                  <div>
-                                    <input
-                                      name="address"
-                                      type="text"
-                                      value={formData.address}
-                                      onChange={handleChange}
-                                      placeholder="Address"
-                                      className="form-control"
-                                    />
-                                  </div>
-                                </div>
-                              </div>
-
-                              <div className="col-sm-6 mb-2">
-                                <div className="control-group">
-                                  <label className="control-label ">Pin Code*</label>
-                                  <div>
-                                    <input
-                                      name="pinCode"
-                                      type="text"
-                                      value={formData.pinCode}
-                                      onChange={handleChange}
-                                      placeholder="Pin Code"
-                                      className="form-control"
-                                    />
-                                  </div>
-                                </div>
-                              </div>
-
-                              <div className="col-sm-6 mb-2">
-                                <div className="control-group">
-                                  <label className="control-label ">City*</label>
-                                  <div>
-                                    <input
-                                      name="city"
-                                      type="text"
-                                      value={formData.city}
-                                      onChange={handleChange}
-                                      placeholder="City"
-                                      className="form-control"
-                                    />
-                                  </div>
-                                </div>
-                              </div>
-
-                              <div className="col-sm-6 mb-2">
-                                <div className="control-group">
-                                  <label className="control-label ">State*</label>
-                                  <div>
-                                    <input
-                                      name="state"
-                                      type="text"
-                                      value={formData.state}
-                                      onChange={handleChange}
-                                      placeholder="State"
-                                      className="form-control"
-                                    />
-                                  </div>
-                                </div>
-                              </div>
-
-                              <div className="col-sm-6">
-                                <div className="control-group">
-                                  <label className="control-label ">Preference State</label>
-                                  <div>
-                                    <input
-                                      name="preferenceState"
-                                      type="text"
-                                      value={formData.preferenceState}
-                                      onChange={handleChange}
-                                      placeholder="Preference State"
-                                      className="form-control"
-                                    />
-                                  </div>
-                                </div>
-                              </div>
-                            </>
-                          )}
-
-                          {/* Submit Button */}
-                          <div className="col-md-12 mt-3 mb-2">
-                            <button
-                              id="submit"
-                              className="default-btn"
-                              type="submit"
-                            >
-                              Submit
-                            </button>
-                          </div>
-                        </div>
-                      </form>
+              {/* Citizenship */}
+              <div className="col-sm-12 mt-2">
+                <h3>Select your citizenship</h3>
+                <div className="d-flex gap-4">
+                  {["Indian Citizen", "Foreign National"].map((type) => (
+                    <div key={type} className="form-check form-check-inline">
+                      <input
+                        type="radio"
+                        name="citizenship"
+                        value={type}
+                        checked={formData.citizenship === type}
+                        onChange={handleChange}
+                        className="form-check-input"
+                      />
+                      <label className="form-check-label">{type}</label>
                     </div>
-                  </div>
+                  ))}
                 </div>
               </div>
+
+              {/* Personal Details */}
+              <div className="col-sm-12 mt-3">
+                <h3>Personal Details</h3>
+              </div>
+
+              <div className="col-sm-6 mb-2">
+                <label>Full Name</label>
+                <input
+                  name="fullName"
+                  type="text"
+                  placeholder="Full Name"
+                  className="form-control"
+                  value={formData.fullName}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div className="col-sm-6 mb-2">
+                <label>Email</label>
+                <input
+                  name="email"
+                  type="email"
+                  placeholder="Email"
+                  className="form-control"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div className="col-sm-6 mb-2">
+                <label>Birthdate</label>
+                <DatePicker
+                  selected={formData.birthdate}
+                  onChange={handleDateChange}
+                  placeholderText="Select your birthdate"
+                  className="form-control"
+                />
+              </div>
+              <div className="col-sm-6 mb-2">
+                <label>Pan Number</label>
+                <input
+                  name="panNumber"
+                  type="text"
+                  placeholder="Pan Card No."
+                  className="form-control"
+                  value={formData.panNumber}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              <div className="col-sm-6 mb-2">
+                <label>Mobile No*</label>
+                <input
+                  name="mobileNumber"
+                  type="text"
+                  placeholder="Mobile No*"
+                  className="form-control"
+                  value={formData.mobileNumber}
+                  onChange={handleChange}
+                  pattern="^\d{10,13}$"
+                  maxLength={13}
+                  onInput={(e) => {
+                    e.target.value = e.target.value.replace(/\D/g, "");
+                  }}
+                  required
+                />
+              </div>
+              <div className="col-sm-6 mb-2">
+                <label>Alternate Mobile No.</label>
+                <input
+                  name="alternateMobileNumber"
+                  type="text"
+                  placeholder="Alternate Mobile No."
+                  className="form-control"
+                  value={formData.alternateMobileNumber}
+                  onChange={handleChange}
+                  pattern="[0-9]{10,13}"
+                  maxLength={13}
+                  onInput={(e) => {
+                    e.target.value = e.target.value.replace(/[^0-9]/g, "");
+                  }}
+                />
+              </div>
+              <div className="col-sm-6 mb-2">
+                <label>Pin Code</label>
+                <input
+                  name="pinCode"
+                  type="text"
+                  placeholder="Enter Pin Code"
+                  className="form-control"
+                  value={formData.pinCode}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="col-sm-6 mb-2">
+                <label>Address</label>
+                <input
+                  name="address"
+                  type="text"
+                  placeholder="Address"
+                  className="form-control"
+                  value={formData.address}
+                  onChange={handleChange}
+                />
+              </div>
+
+              {/* 80G Certificate Option */}
+              <div className="col-sm-12 mb-2">
+                <h4 className="mt-3">
+                  <input
+                    type="checkbox"
+                    checked={formData.wants80GCertificate}
+                    onChange={handleCheckboxChange}
+                  />{" "}
+                  I would like to receive 80(G) Certificate
+                </h4>
+              </div>
+
+              {/* Certificate Fields */}
+              {formData.wants80GCertificate && (
+                <>
+                  <div className="col-sm-6 mb-2">
+                    <label>PAN Number</label>
+                    <input
+                      name="panCardNumber"
+                      type="text"
+                      placeholder="PAN Card No."
+                      className="form-control"
+                      value={formData.certificateDetails.panCardNumber}
+                      onChange={handleChange}
+                    />
+                  </div>
+                  <div className="col-sm-6 mb-2">
+                    <label>Address*</label>
+                    <input
+                      name="certificateAddress"
+                      type="text"
+                      placeholder="Address"
+                      className="form-control"
+                      value={formData.certificateDetails.certificateAddress}
+                      onChange={handleChange}
+                    />
+                  </div>
+                  <div className="col-sm-6 mb-2">
+                    <label>Pin Code*</label>
+                    <input
+                      name="certificatePinCode"
+                      type="text"
+                      placeholder="Pin Code"
+                      className="form-control"
+                      value={formData.certificateDetails.certificatePinCode}
+                      onChange={handleChange}
+                    />
+                  </div>
+                  <div className="col-sm-6 mb-2">
+                    <label>City*</label>
+                    <input
+                      name="certificateCity"
+                      type="text"
+                      placeholder="City"
+                      className="form-control"
+                      value={formData.certificateDetails.certificateCity}
+                      onChange={handleChange}
+                    />
+                  </div>
+                  <div className="col-sm-6 mb-2">
+                    <label>State*</label>
+                    <input
+                      name="certificateState"
+                      type="text"
+                      placeholder="State"
+                      className="form-control"
+                      value={formData.certificateDetails.certificateState}
+                      onChange={handleChange}
+                    />
+                  </div>
+                  <div className="col-sm-6 mb-2">
+                    <label>Preference State</label>
+                    <input
+                      name="preferenceState"
+                      type="text"
+                      placeholder="Preference State"
+                      className="form-control"
+                      value={formData.certificateDetails.preferenceState}
+                      onChange={handleChange}
+                    />
+                  </div>
+                </>
+              )}
+
+              <div className="col-md-12 mt-3 mb-2">
+                <button className="default-btn" type="submit">
+                  Submit
+                </button>
+              </div>
             </div>
-          </div>
-        </section>
-      </div>
+          </form>
+        </div>
+      </section>
     </Layout>
   );
 }

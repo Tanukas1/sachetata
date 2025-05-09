@@ -3,41 +3,141 @@ import Layout from "../layout/Layout";
 import { FaInfoCircle } from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import axios from "axios";
 
 function DonateInMemory() {
+  const [occasionDate, setOccasionDate] = useState(null);
   const [birthdate, setBirthdate] = useState(null);
-  const [formData, setFormData] = useState({
-    citizenship: "Indian Citizen",
-    donationType: "Donate Once",
+
+  const initialFormData = {
+    citizenship: "",
+    donationType: "",
     honoreeName: "",
-    relationship: "",
+    relationshipWithHonoree: "",
     occasionName: "",
-    occasionDate: "",
     fullName: "",
     email: "",
-    mobile: "",
-    altMobile: "",
-    receiveCertificate: false,
-    pan: "",
-    address: "",
-    pinCode: "",
-    city: "",
-    state: "",
-    prefState: "",
-  });
+    mobileNumber: "",
+    alternateMobileNumber: "",
+    wants80GCertificate: false,
+    certificateDetails: {
+      panCardNumber: "",
+      certificateAddress: "",
+      certificatePinCode: "",
+      certificateCity: "",
+      certificateState: "",
+      preferenceState: "",
+    },
+  };
 
-  // Handle Input Change
+  const [formData, setFormData] = useState(initialFormData);
+
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+
+    if (type === "checkbox") {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: checked,
+      }));
+    } else if (
+      [
+        "panCardNumber",
+        "certificateAddress",
+        "certificatePinCode",
+        "certificateCity",
+        "certificateState",
+        "preferenceState",
+      ].includes(name)
+    ) {
+      setFormData((prev) => ({
+        ...prev,
+        certificateDetails: {
+          ...prev.certificateDetails,
+          [name]: value,
+        },
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
   };
 
   const handleCheckboxChange = (e) => {
-    setFormData({ ...formData, receiveCertificate: e.target.checked });
+    setFormData((prev) => ({
+      ...prev,
+      wants80GCertificate: e.target.checked,
+    }));
+  };
+
+  const formatDateOnly = (date) => {
+    if (!date) return null;
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!formData.fullName || !formData.email || !formData.mobileNumber) {
+      toast.error("Please fill all required fields.");
+      return;
+    }
+
+    const digitsOnly = formData.mobileNumber.replace(/\D/g, "");
+    if (digitsOnly.length < 10 || digitsOnly.length > 13) {
+      toast.error("Contact number must be between 10 and 13 digits.");
+      return;
+    }
+
+    const finalData = {
+      ...formData,
+      birthdate: birthdate ? formatDateOnly(birthdate) : null,
+      occasionDate: occasionDate ? formatDateOnly(occasionDate) : null,
+      panNumber: formData.certificateDetails.panCardNumber || "XYZAB5678C",
+    };
+
+    try {
+      const response = await axios.post(
+        "http://sucheta.traficoanalytica.com/api/v1/enquiry/add-in-memory-donation",
+        finalData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.status === 200 || response.status === 201) {
+        toast.success("Donation form submitted successfully!");
+        setFormData(initialFormData);
+        setBirthdate(null);
+        setOccasionDate(null);
+      } else {
+        toast.error("Something went wrong while submitting the form.");
+      }
+    } catch (error) {
+      console.error("Axios Error:", error);
+      if (error.response) {
+        toast.error(error.response.data?.message || "Server error occurred.");
+      } else if (error.request) {
+        toast.error("No response from server.");
+      } else {
+        toast.error("Request error: " + error.message);
+      }
+    }
   };
 
   return (
     <Layout>
+      <ToastContainer />
       <div>
         <div className="header-height" />
         <div>
@@ -57,7 +157,7 @@ function DonateInMemory() {
               <div className="col-xs-12 col-md-12">
                 <div className="panel panel-default">
                   <div className="panel-body">
-                    <form>
+                    <form onSubmit={handleSubmit}>
                       <div className="row">
                         <div className="col-12 col-sm-12 mt-2">
                           <h3>Select your citizenship</h3>
@@ -67,7 +167,10 @@ function DonateInMemory() {
                               "Indian Citizen (NRE, NRI, NRO)",
                               "Foreign National",
                             ].map((type) => (
-                              <div key={type} className="form-check form-check-inline">
+                              <div
+                                key={type}
+                                className="form-check form-check-inline"
+                              >
                                 <input
                                   type="radio"
                                   name="citizenship"
@@ -76,7 +179,9 @@ function DonateInMemory() {
                                   onChange={handleChange}
                                   className="form-check-input"
                                 />
-                                <label className="form-check-label">{type}</label>
+                                <label className="form-check-label">
+                                  {type}
+                                </label>
                               </div>
                             ))}
                           </div>
@@ -86,7 +191,10 @@ function DonateInMemory() {
                           <h3 className="mt-3">Select donation type</h3>
                           <div className="d-flex gap-4">
                             {["Donate Once", "Donate Monthly"].map((type) => (
-                              <div key={type} className="form-check form-check-inline">
+                              <div
+                                key={type}
+                                className="form-check form-check-inline"
+                              >
                                 <input
                                   type="radio"
                                   name="donationType"
@@ -95,14 +203,18 @@ function DonateInMemory() {
                                   onChange={handleChange}
                                   className="form-check-input"
                                 />
-                                <label className="form-check-label">{type}</label>
+                                <label className="form-check-label">
+                                  {type}
+                                </label>
                               </div>
                             ))}
                           </div>
                         </div>
 
                         <div className="col-12 col-sm-12 mt-2">
-                          <h3>I want my donation to be dedicated to: In Memory Of</h3>
+                          <h3>
+                            I want my donation to be dedicated to: In Memory Of
+                          </h3>
                         </div>
 
                         <div className="col-12 col-sm-6 mb-2">
@@ -120,21 +232,21 @@ function DonateInMemory() {
                         <div className="col-12 col-sm-6 mb-2">
                           <label>Relationship With</label>
                           <input
-                            name="relationship"
+                            name="relationshipWithHonoree"
                             type="text"
                             placeholder="Relationship With"
                             className="form-control"
-                            value={formData.relationship}
+                            value={formData.relationshipWithHonoree}
                             onChange={handleChange}
                           />
                         </div>
 
                         <div className="col-12 col-sm-6 mb-2">
-                          <label>Occasion Name</label>
+                          <label>Occassion Name</label>
                           <input
                             name="occasionName"
                             type="text"
-                            placeholder="Occasion Name"
+                            placeholder="Occassion Name"
                             className="form-control"
                             value={formData.occasionName}
                             onChange={handleChange}
@@ -142,12 +254,10 @@ function DonateInMemory() {
                         </div>
 
                         <div className="col-12 col-sm-6 mb-2">
-                          <label>Occasion Date</label>
+                          <label>Occassion Date</label>
                           <DatePicker
-                            selected={formData.occasionDate}
-                            onChange={(date) =>
-                              setFormData({ ...formData, occasionDate: date })
-                            }
+                            selected={occasionDate}
+                            onChange={(date) => setOccasionDate(date)}
                             placeholderText="Select Date"
                             className="form-control"
                           />
@@ -190,24 +300,40 @@ function DonateInMemory() {
                         <div className="col-12 col-sm-6 mb-2">
                           <label>Mobile No.*</label>
                           <input
-                            name="mobile"
-                            type="text"
+                            name="mobileNumber"
+                            type="tel"
                             placeholder="Mobile No."
                             className="form-control"
-                            value={formData.mobile}
+                            value={formData.mobileNumber}
                             onChange={handleChange}
+                            pattern="[0-9]{10,13}"
+                            maxLength={13}
+                            onInput={(e) => {
+                              e.target.value = e.target.value.replace(
+                                /[^0-9]/g,
+                                ""
+                              );
+                            }}
                           />
                         </div>
 
                         <div className="col-12 col-sm-12 mb-2">
                           <label>Alternate Mobile No.</label>
                           <input
-                            name="altMobile"
-                            type="text"
+                            name="alternateMobileNumber"
+                            type="tel"
                             placeholder="Alternate Mobile No."
                             className="form-control"
-                            value={formData.altMobile}
+                            value={formData.alternateMobileNumber}
                             onChange={handleChange}
+                            pattern="[0-9]{10}"
+                            maxLength={13}
+                            onInput={(e) => {
+                              e.target.value = e.target.value.replace(
+                                /[^0-9]/g,
+                                ""
+                              );
+                            }}
                           />
                         </div>
 
@@ -215,83 +341,95 @@ function DonateInMemory() {
                           <h4 className="mt-3">
                             <input
                               type="checkbox"
-                              checked={formData.receiveCertificate}
+                              checked={formData.wants80GCertificate}
                               onChange={handleCheckboxChange}
                             />{" "}
                             I would like to receive 80(G) Certificate
                           </h4>
                         </div>
 
-                        {formData.receiveCertificate && (
+                        {formData.wants80GCertificate && (
                           <>
-                            <div className="col-sm-6">
-                              <label>Pan Number</label>
+                            <div className="col-sm-6 mb-2">
+                              <label>PAN Number</label>
                               <input
-                                name="pan"
+                                name="panCardNumber"
                                 type="text"
                                 placeholder="Pan Card No."
                                 className="form-control"
-                                value={formData.pan}
+                                value={
+                                  formData.certificateDetails.panCardNumber
+                                }
                                 onChange={handleChange}
+                                required
                               />
                             </div>
-
-                            <div className="col-sm-6">
+                            <div className="col-sm-6 mb-2">
                               <label>Address*</label>
                               <input
-                                name="address"
+                                name="certificateAddress"
                                 type="text"
                                 placeholder="Address"
                                 className="form-control"
-                                value={formData.address}
+                                value={
+                                  formData.certificateDetails.certificateAddress
+                                }
                                 onChange={handleChange}
+                                required
                               />
                             </div>
-
-                            <div className="col-sm-6">
+                            <div className="col-sm-6 mb-2">
                               <label>Pin Code*</label>
                               <input
-                                name="pinCode"
+                                name="certificatePinCode"
                                 type="text"
                                 placeholder="Pin Code"
                                 className="form-control"
-                                value={formData.pinCode}
+                                value={
+                                  formData.certificateDetails.certificatePinCode
+                                }
                                 onChange={handleChange}
+                                required
                               />
                             </div>
-
-                            <div className="col-sm-6">
+                            <div className="col-sm-6 mb-2">
                               <label>City*</label>
                               <input
-                                name="city"
+                                name="certificateCity"
                                 type="text"
                                 placeholder="City"
                                 className="form-control"
-                                value={formData.city}
+                                value={
+                                  formData.certificateDetails.certificateCity
+                                }
                                 onChange={handleChange}
+                                required
                               />
                             </div>
-
-                            <div className="col-sm-6">
+                            <div className="col-sm-6 mb-2">
                               <label>State*</label>
                               <input
-                                name="state"
+                                name="certificateState"
                                 type="text"
                                 placeholder="State"
                                 className="form-control"
-                                value={formData.state}
+                                value={
+                                  formData.certificateDetails.certificateState
+                                }
                                 onChange={handleChange}
+                                required
                               />
                             </div>
-
-                            <div className="col-sm-6">
+                            <div className="col-sm-6 mb-2">
                               <label>Preference State</label>
                               <input
-                                name="prefState"
+                                name="preferenceState"
                                 type="text"
                                 placeholder="Preference State"
                                 className="form-control"
-                                value={formData.prefState}
+                                value={
+                                  formData.certificateDetails.preferenceState
+                                } 
                                 onChange={handleChange}
                               />
                             </div>

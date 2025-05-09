@@ -2,45 +2,125 @@ import React, { useState } from "react";
 import Layout from "../layout/Layout";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import axios from "axios";
 
 function DonateInHonor() {
-  const [formData, setFormData] = useState({
-    citizenship: "Indian Citizen",
-    donationType: "Donate Once",
+  const initialFormData = {
+    citizenship: "",
+    occasionDate: "",
+    occasionName: "",
     honoreeName: "",
-    relationship: "",
+    relationshipWithHonoree: "",
     honoreeEmail: "",
     honoreeMobile: "",
-    occasionName: "",
-    occasionDate: null,
     fullName: "",
     email: "",
-    birthdate: null,
-    mobile: "",
-    altMobile: "",
-    receiveCertificate: false,
-    pan: "",
-    address: "",
-    pinCode: "",
-    city: "",
-    state: "",
-    preferenceState: "",
-  });
+    birthdate: "",
+    mobileNumber: "",
+    alternateMobileNumber: "",
+    wants80GCertificate: false,
+    certificateDetails: {
+      panCardNumber: "",
+      certificateAddress: "",
+      certificatePinCode: "",
+      certificateCity: "",
+      certificateState: "",
+      preferenceState: "",
+    },
+  };
+
+  const [formData, setFormData] = useState(initialFormData);
+  const [birthdate, setBirthdate] = useState(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+
+    if (
+      [
+        "panCardNumber",
+        "certificateAddress",
+        "certificatePinCode",
+        "certificateCity",
+        "certificateState",
+        "preferenceState",
+      ].includes(name)
+    ) {
+      setFormData((prev) => ({
+        ...prev,
+        certificateDetails: {
+          ...prev.certificateDetails,
+          [name]: value,
+        },
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
   };
 
   const handleCheckboxChange = (e) => {
     setFormData((prev) => ({
       ...prev,
-      receiveCertificate: e.target.checked,
+      wants80GCertificate: e.target.checked,
     }));
   };
+
+  const formatDateOnly = (date) => {
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+  
+    if (!formData.fullName || !formData.email || !formData.mobileNumber) {
+      toast.error("Please fill all required fields.");
+      return;
+    }
+  
+    const finalData = {
+      ...formData,
+      occasionDate: formData.occasionDate ? formatDateOnly(formData.occasionDate) : null,
+      birthdate: formData.birthdate ? formatDateOnly(formData.birthdate) : null,
+      panNumber: formData.certificateDetails.panCardNumber || "XYZAB5678C",
+    };
+  
+    try {
+      const response = await axios.post(
+        "http://sucheta.traficoanalytica.com/api/v1/enquiry/add-in-honour-donation",
+        finalData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+  
+      if (response.status === 200 || response.status === 201) {
+        toast.success("Donation form submitted successfully!");
+        setFormData(initialFormData);
+      } else {
+        toast.error("Something went wrong while submitting the form.");
+      }
+    } catch (error) {
+      console.error("Axios Error:", error);
+      if (error.response) {
+        toast.error(error.response.data?.message || "Server error occurred.");
+      } else if (error.request) {
+        toast.error("No response from server.");
+      } else {
+        toast.error("Request error: " + error.message);
+      }
+    }
+  };
+  
 
   return (
     <Layout>
@@ -64,7 +144,7 @@ function DonateInHonor() {
                 <div className="panel panel-default">
                   <div className="panel-body">
                     <div className="bodyTest">
-                      <form>
+                      <form onSubmit={handleSubmit}>
                         <div className="row">
                           <div className="col-12 col-sm-12 mb-2">
                             <h3>Select your citizenship</h3>
@@ -100,7 +180,7 @@ function DonateInHonor() {
                           <div className="col-12 col-sm-6 mb-2">
                             <div className="control-group">
                               <label className="control-label">
-                                Occasion Date
+                                Occassion Date
                               </label>
                               <DatePicker
                                 selected={formData.occasionDate}
@@ -117,14 +197,14 @@ function DonateInHonor() {
                           </div>
                           <div className="col-12 col-sm-6 mb-2">
                             <label className="control-label">
-                              Occasion Name
+                              Occassion Name
                             </label>
                             <input
                               name="occasionName"
                               value={formData.occasionName}
                               onChange={handleChange}
                               type="text"
-                              placeholder="Occasion Name"
+                              placeholder="Occassion Name"
                               className="form-control"
                             />
                           </div>
@@ -146,8 +226,8 @@ function DonateInHonor() {
                               Relationship With
                             </label>
                             <input
-                              name="relationship"
-                              value={formData.relationship}
+                              name="relationshipWithHonoree"
+                              value={formData.relationshipWithHonoree}
                               onChange={handleChange}
                               type="text"
                               placeholder="Relationship With"
@@ -178,6 +258,14 @@ function DonateInHonor() {
                               type="text"
                               placeholder="Honoree Mobile No."
                               className="form-control"
+                              pattern="[0-9]{10}"
+                              maxLength={13}
+                              onInput={(e) => {
+                                e.target.value = e.target.value.replace(
+                                  /[^0-9]/g,
+                                  ""
+                                );
+                              }}
                             />
                           </div>
 
@@ -224,12 +312,20 @@ function DonateInHonor() {
                           <div className="col-12 col-sm-6 mb-2">
                             <label className="control-label">Mobile No.*</label>
                             <input
-                              name="mobile"
-                              value={formData.mobile}
+                              name="mobileNumber"
+                              value={formData.mobileNumber}
                               onChange={handleChange}
                               type="text"
                               placeholder="Mobile No.*"
                               className="form-control"
+                              pattern="[0-9]{10,13}"
+                              maxLength={13}
+                              onInput={(e) => {
+                                e.target.value = e.target.value.replace(
+                                  /[^0-9]/g,
+                                  ""
+                                );
+                              }}
                             />
                           </div>
                           <div className="col-12 col-sm-12 mb-2">
@@ -237,106 +333,131 @@ function DonateInHonor() {
                               Alternate Mobile No.
                             </label>
                             <input
-                              name="altMobile"
-                              value={formData.altMobile}
+                              name="alternateMobileNumber"
+                              value={formData.alternateMobileNumber}
                               onChange={handleChange}
                               type="text"
                               placeholder="Mobile Number"
                               className="form-control"
+                              pattern="[0-9]{10,13}"
+                              maxLength={13}
+                              onInput={(e) => {
+                                e.target.value = e.target.value.replace(
+                                  /[^0-9]/g,
+                                  ""
+                                );
+                              }}
                             />
                           </div>
                           <div className="col-12 col-sm-12 mb-2">
                             <h4 className="mt-3">
                               <input
                                 type="checkbox"
-                                checked={formData.receiveCertificate}
+                                checked={formData.wants80GCertificate}
                                 onChange={handleCheckboxChange}
                               />{" "}
                               I would like to receive 80(G) Certificate
                             </h4>
                           </div>
 
-                          {formData.receiveCertificate && (
-                            <>
-                              <div className="col-sm-6">
-                                <label className="control-label">Pan Number</label>
-                                <input
-                                  name="pan"
-                                  value={formData.pan}
-                                  onChange={handleChange}
-                                  type="text"
-                                  placeholder="Pan Card No."
-                                  className="form-control"
-                                />
-                              </div>
-                              <div className="col-sm-6">
-                                <label className="control-label">Address*</label>
-                                <input
-                                  name="address"
-                                  value={formData.address}
-                                  onChange={handleChange}
-                                  type="text"
-                                  placeholder="Address"
-                                  className="form-control"
-                                />
-                              </div>
-                              <div className="col-sm-6">
-                                <label className="control-label">Pin Code*</label>
-                                <input
-                                  name="pinCode"
-                                  value={formData.pinCode}
-                                  onChange={handleChange}
-                                  type="text"
-                                  placeholder="Pin Code"
-                                  className="form-control"
-                                />
-                              </div>
-                              <div className="col-sm-6">
-                                <label className="control-label">City*</label>
-                                <input
-                                  name="city"
-                                  value={formData.city}
-                                  onChange={handleChange}
-                                  type="text"
-                                  placeholder="City"
-                                  className="form-control"
-                                />
-                              </div>
-                              <div className="col-sm-6">
-                                <label className="control-label">State*</label>
-                                <input
-                                  name="state"
-                                  value={formData.state}
-                                  onChange={handleChange}
-                                  type="text"
-                                  placeholder="State"
-                                  className="form-control"
-                                />
-                              </div>
-                              <div className="col-sm-6">
-                                <label className="control-label">
-                                  Preference State
-                                </label>
-                                <input
-                                  name="preferenceState"
-                                  value={formData.preferenceState}
-                                  onChange={handleChange}
-                                  type="text"
-                                  placeholder="State"
-                                  className="form-control"
-                                />
-                              </div>
-                            </>
-                          )}
-                          <div className="col-md-12 mt-3 mb-2">
-                            <button
-                              id="submit"
-                              className="default-btn"
-                              type="submit"
-                            >
-                              Submit
-                            </button>
-                          </div>
+                          {formData.wants80GCertificate && (
+                          <>
+                            <div className="col-sm-6">
+                              <label>Pan Number</label>
+                              <input
+                                name="panCardNumber"
+                                type="text"
+                                placeholder="Pan Card No."
+                                className="form-control"
+                                value={
+                                  formData.certificateDetails.panCardNumber
+                                }
+                                onChange={handleChange}
+                                required
+                              />
+                            </div>
+
+                            <div className="col-sm-6">
+                              <label>Address*</label>
+                              <input
+                                name="certificateAddress"
+                                type="text"
+                                placeholder="Address"
+                                className="form-control"
+                                value={
+                                  formData.certificateDetails.certificateAddress
+                                }
+                                onChange={handleChange}
+                                required
+                              />
+                            </div>
+
+                            <div className="col-sm-6">
+                              <label>Pin Code*</label>
+                              <input
+                                name="certificatePinCode"
+                                type="text"
+                                placeholder="Pin Code"
+                                className="form-control"
+                                value={
+                                  formData.certificateDetails.certificatePinCode
+                                }
+                                onChange={handleChange}
+                                required
+                              />
+                            </div>
+
+                            <div className="col-sm-6">
+                              <label>City*</label>
+                              <input
+                                name="certificateCity"
+                                type="text"
+                                placeholder="City"
+                                className="form-control"
+                                value={
+                                  formData.certificateDetails.certificateCity
+                                }
+                                onChange={handleChange}
+                                required
+                              />
+                            </div>
+
+                            <div className="col-sm-6">
+                              <label>State*</label>
+                              <input
+                                name="certificateState"
+                                type="text"
+                                placeholder="State"
+                                className="form-control"
+                                value={
+                                  formData.certificateDetails.certificateState
+                                }
+                                onChange={handleChange}
+                                required
+                              />
+                            </div>
+
+                            <div className="col-sm-6">
+                              <label>Preference State</label>
+                              <input
+                                name="preferenceState"
+                                type="text"
+                                placeholder="Preference State"
+                                className="form-control"
+                                value={
+                                  formData.certificateDetails.preferenceState
+                                }
+                                onChange={handleChange}
+                              />
+                            </div>
+                          </>
+                        )}
+
+                        <div className="col-md-12 mt-3 mb-2">
+                          <button className="default-btn" type="submit">
+                            Submit
+                          </button>
+                        </div>
                         </div>
                       </form>
                     </div>
@@ -347,6 +468,7 @@ function DonateInHonor() {
           </div>
         </section>
       </div>
+      <ToastContainer />
     </Layout>
   );
 }

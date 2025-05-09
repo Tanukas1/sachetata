@@ -3,46 +3,136 @@ import Layout from "../layout/Layout";
 import { FaInfoCircle } from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import axios from "axios";
 
 function Occasional() {
   const [birthdate, setBirthdate] = useState(null);
-  const [formData, setFormData] = useState({
-    citizenship: "Indian Citizen",
-    donationType: "Donate Once",
+
+  const initialFormData = {
+    citizenship: "",
+    donationType: "",
     honoreeName: "",
-    relationship: "",
+    relationshipWithHonoree: "",
     occasionName: "",
-    occasionDate: "",
-    birthday: "", // Added birthday field here
-    receiveCertificate: false,
+    occasionDate: null, 
     fullName: "",
     email: "",
-    mobileNo: "",
-    alternateMobileNo: "",
-    panNumber: "",
-    address: "",
-    pinCode: "",
-    city: "",
-    state: "",
-    preferenceState: "",
-  });
+    birthdate: null,
+    mobileNumber: "",
+    alternateMobileNumber: "",
+    wants80GCertificate: false,
+    certificateDetails: {
+      panCardNumber: "",
+      certificateAddress: "",
+      certificatePinCode: "",
+      certificateCity: "",
+      certificateState: "",
+      preferenceState: "",
+    },
+  };
 
-  // Handle Input Change
+  const [formData, setFormData] = useState(initialFormData);
+
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+
+    if (
+      [
+        "panCardNumber",
+        "certificateAddress",
+        "certificatePinCode",
+        "certificateCity",
+        "certificateState",
+        "preferenceState",
+      ].includes(name)
+    ) {
+      setFormData((prev) => ({
+        ...prev,
+        certificateDetails: {
+          ...prev.certificateDetails,
+          [name]: value,
+        },
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
   };
 
   const handleCheckboxChange = (e) => {
-    setFormData({ ...formData, receiveCertificate: e.target.checked });
+    setFormData((prev) => ({
+      ...prev,
+      wants80GCertificate: e.target.checked,
+    }));
   };
 
-  const handleDateChange = (date) => {
-    setBirthdate(date);
-    setFormData({ ...formData, occasionDate: date });
+  const formatDateOnly = (date) => {
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (
+      !formData.fullName ||
+      !formData.email ||
+      !formData.mobileNumber ||
+      !formData.honoreeName ||
+      !formData.occasionDate
+    ) {
+      toast.error("Please fill all required fields.");
+      return;
+    }
+
+    const finalData = {
+      ...formData,
+      birthdate: formData.birthdate ? formatDateOnly(formData.birthdate) : null,
+      occasionDate: formData.occasionDate
+        ? formatDateOnly(formData.occasionDate)
+        : null,
+    };
+
+    try {
+      const response = await axios.post(
+        "http://sucheta.traficoanalytica.com/api/v1/enquiry/add-special-occasion-donation",
+        finalData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.status === 200 || response.status === 201) {
+        toast.success("Donation form submitted successfully!");
+        setFormData(initialFormData);
+        setBirthdate(null);
+      } else {
+        toast.error("Something went wrong while submitting the form.");
+      }
+    } catch (error) {
+      console.error("Axios Error:", error);
+      if (error.response) {
+        toast.error(error.response.data?.message || "Server error occurred.");
+      } else if (error.request) {
+        toast.error("No response from server.");
+      } else {
+        toast.error("Request error: " + error.message);
+      }
+    }
   };
 
   return (
     <Layout>
+      <ToastContainer />
       <div>
         <div className="header-height" />
         <div>
@@ -58,12 +148,12 @@ function Occasional() {
             <div className="section-heading text-center mb-40">
               <h2>Donate For A Special Occasion</h2>
             </div>
-            <div className="row frm">
-              <div className="col-xs-12 col-md-12">
-                <div className="panel panel-default">
-                  <div className="panel-body">
-                    <div className="bodyTest">
-                      <form>
+            <form onSubmit={handleSubmit}>
+              <div className="row frm">
+                <div className="col-xs-12 col-md-12">
+                  <div className="panel panel-default">
+                    <div className="panel-body">
+                      <div className="bodyTest">
                         <div className="row">
                           <div className="col-12 col-sm-12">
                             {/* Citizenship Input */}
@@ -74,7 +164,10 @@ function Occasional() {
                                 "Indian Citizen (NRE, NRI, NRO)",
                                 "Foreign National",
                               ].map((type) => (
-                                <div key={type} className="form-check form-check-inline">
+                                <div
+                                  key={type}
+                                  className="form-check form-check-inline"
+                                >
                                   <input
                                     type="radio"
                                     name="citizenship"
@@ -83,16 +176,22 @@ function Occasional() {
                                     onChange={handleChange}
                                     className="form-check-input"
                                   />
-                                  <label className="form-check-label">{type}</label>
+                                  <label className="form-check-label">
+                                    {type}
+                                  </label>
                                 </div>
                               ))}
                             </div>
                           </div>
+
                           <div className="col-12 col-sm-12">
                             <h3 className="mt-3">Select donation type</h3>
                             <div className="d-flex gap-4">
                               {["Donate Once", "Donate Monthly"].map((type) => (
-                                <div key={type} className="form-check form-check-inline">
+                                <div
+                                  key={type}
+                                  className="form-check form-check-inline"
+                                >
                                   <input
                                     type="radio"
                                     name="donationType"
@@ -101,7 +200,9 @@ function Occasional() {
                                     onChange={handleChange}
                                     className="form-check-input"
                                   />
-                                  <label className="form-check-label">{type}</label>
+                                  <label className="form-check-label">
+                                    {type}
+                                  </label>
                                 </div>
                               ))}
                             </div>
@@ -109,16 +210,18 @@ function Occasional() {
 
                           <div className="col-12 col-sm-12">
                             <h3 className="mt-3">
-                              I want my donation to be dedicated to: In Memory Of
+                              I want my donation to be dedicated to: In Memory
+                              Of
                             </h3>
                           </div>
 
                           {/* Honoree Name Input */}
                           <div className="col-12 col-sm-6 mb-3">
                             <div className="control-group">
-                              <label className="control-label">Honoree Name</label>
+                              <label className="control-label">
+                                Honoree Name
+                              </label>
                               <input
-                                id="honoreeName"
                                 name="honoreeName"
                                 type="text"
                                 value={formData.honoreeName}
@@ -128,18 +231,17 @@ function Occasional() {
                               />
                             </div>
                           </div>
-
-                          {/* Relationship With Input */}
                           <div className="col-12 col-sm-6 mb-3">
                             <div className="control-group">
-                              <label className="control-label">Relationship With</label>
+                              <label className="control-label">
+                                Relationship with Honoree
+                              </label>
                               <input
-                                id="relationship"
-                                name="relationship"
+                                name="relationshipWithHonoree"
                                 type="text"
-                                value={formData.relationship}
+                                value={formData.relationshipWithHonoree}
                                 onChange={handleChange}
-                                placeholder="Relationship With"
+                                placeholder="Relationship with Honoree"
                                 className="form-control"
                               />
                             </div>
@@ -148,27 +250,35 @@ function Occasional() {
                           {/* Occasion Name Input */}
                           <div className="col-12 col-sm-6 mb-3">
                             <div className="control-group">
-                              <label className="control-label">Occasion Name</label>
+                              <label className="control-label">
+                                Occassion Name
+                              </label>
                               <input
-                                id="occasionName"
                                 name="occasionName"
                                 type="text"
                                 value={formData.occasionName}
                                 onChange={handleChange}
-                                placeholder="Occasion Name"
+                                placeholder="Occassion Name"
                                 className="form-control"
                               />
                             </div>
                           </div>
 
-                          {/* Occasion Date Picker */}
+                          {/* Occasion Date Input */}
                           <div className="col-12 col-sm-6 mb-3">
                             <div className="control-group">
-                              <label className="control-label">Occasion Date</label>
+                              <label className="control-label">
+                                Occassion Date
+                              </label>
                               <DatePicker
-                                selected={birthdate}
-                                onChange={handleDateChange}
-                                placeholderText="Select Date"
+                                selected={formData.occasionDate}
+                                onChange={(date) =>
+                                  setFormData({
+                                    ...formData,
+                                    occasionDate: date,
+                                  })
+                                }
+                                placeholderText="Select Occassion Date"
                                 className="form-control"
                               />
                             </div>
@@ -179,7 +289,6 @@ function Occasional() {
                             <div className="control-group">
                               <label className="control-label">Full Name</label>
                               <input
-                                id="fullName"
                                 name="fullName"
                                 type="text"
                                 value={formData.fullName}
@@ -195,9 +304,8 @@ function Occasional() {
                             <div className="control-group">
                               <label className="control-label">Email</label>
                               <input
-                                id="email"
                                 name="email"
-                                type="text"
+                                type="email"
                                 value={formData.email}
                                 onChange={handleChange}
                                 placeholder="Email"
@@ -206,176 +314,192 @@ function Occasional() {
                             </div>
                           </div>
 
-                          {/* Birthday Input */}
+                          {/* Birthdate Input */}
                           <div className="col-12 col-sm-6 mb-3">
                             <div className="control-group">
-                              <label className="control-label">Birthday</label>
+                              <label className="control-label">Birthdate</label>
                               <DatePicker
-                                selected={formData.birthday}
-                                onChange={(date) => setFormData({ ...formData, birthday: date })}
-                                placeholderText="Select Birthday"
-                                className="form-control"
-                              />
-                            </div>
-                          </div>
-                          {/* Mobile No. Input */}
-                          <div className="col-12 col-sm-6 mb-3">
-                            <div className="control-group">
-                              <label className="control-label">Mobile No.*</label>
-                              <input
-                                id="mobileNo"
-                                name="mobileNo"
-                                type="text"
-                                value={formData.mobileNo}
-                                onChange={handleChange}
-                                placeholder="Mobile No.*"
+                                selected={formData.birthdate}
+                                onChange={(date) =>
+                                  setFormData({ ...formData, birthdate: date })
+                                }
+                                placeholderText="Select Your Birthdate"
                                 className="form-control"
                               />
                             </div>
                           </div>
 
-                          {/* Alternate Mobile No. Input */}
-                          <div className="col-12 col-sm-12 mb-3">
+                          {/* Mobile Number Input */}
+                          <div className="col-12 col-sm-6 mb-3">
                             <div className="control-group">
-                              <label className="control-label">Alternate Mobile No.</label>
+                              <label className="control-label">
+                                Mobile Number
+                              </label>
                               <input
-                                id="alternateMobileNo"
-                                name="alternateMobileNo"
-                                type="text"
-                                value={formData.alternateMobileNo}
+                                name="mobileNumber"
+                                type="tel"
+                                value={formData.mobileNumber}
                                 onChange={handleChange}
                                 placeholder="Mobile Number"
                                 className="form-control"
+                                pattern="^[0-9]{10,13}$"
+                                minLength={10}
+                                maxLength={13}
+                                required
+                                onInput={(e) => {
+                                  e.target.value = e.target.value.replace(
+                                    /[^0-9]/g,
+                                    ""
+                                  );
+                                }}
                               />
                             </div>
                           </div>
 
-                          {/* Certificate Checkbox */}
-                          <div className="col-12 col-sm-12 mb-3">
+                          {/* Alternate Mobile Number Input */}
+                          <div className="col-12 col-sm-6 mb-3">
+                            <div className="control-group">
+                              <label className="control-label">
+                                Alternate Mobile Number (Optional)
+                              </label>
+                              <input
+                                name="alternateMobileNumber"
+                                type="tel"
+                                value={formData.alternateMobileNumber}
+                                onChange={handleChange}
+                                placeholder="Alternate Mobile Number"
+                                className="form-control"
+                                pattern="^[0-9]{10,13}$"
+                                minLength={10}
+                                maxLength={13}
+                                onInput={(e) => {
+                                  e.target.value = e.target.value.replace(
+                                    /[^0-9]/g,
+                                    ""
+                                  );
+                                }}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="col-12 col-sm-12 mb-2">
                             <h4 className="mt-3">
                               <input
                                 type="checkbox"
-                                checked={formData.receiveCertificate}
+                                checked={formData.wants80GCertificate}
                                 onChange={handleCheckboxChange}
-                                className="mr-2"
-                              />
-                               I would like to receive 80(G) Certificate
+                              />{" "}
+                              I would like to receive 80(G) Certificate
                             </h4>
                           </div>
 
-                          {formData.receiveCertificate && (
+                          {formData.wants80GCertificate && (
                             <>
-                              {/* Pan Number Input */}
                               <div className="col-sm-6">
-                                <div className="control-group">
-                                  <label className="control-label">Pan Number</label>
-                                  <input
-                                    id="panNumber"
-                                    name="panNumber"
-                                    type="text"
-                                    value={formData.panNumber}
-                                    onChange={handleChange}
-                                    placeholder="Pan Card No."
-                                    className="form-control"
-                                  />
-                                </div>
-                              </div>
-
-                              {/* Address Input */}
-                              <div className="col-sm-6">
-                                <div className="control-group">
-                                  <label className="control-label">Address*</label>
-                                  <input
-                                    id="address"
-                                    name="address"
-                                    type="text"
-                                    value={formData.address}
-                                    onChange={handleChange}
-                                    placeholder="Address"
-                                    className="form-control"
-                                  />
-                                </div>
-                              </div>
-
-                              {/* Pin Code Input */}
-                              <div className="col-sm-6">
-                                <div className="control-group">
-                                  <label className="control-label">Pin Code*</label>
-                                  <input
-                                    id="pinCode"
-                                    name="pinCode"
-                                    type="text"
-                                    value={formData.pinCode}
-                                    onChange={handleChange}
-                                    placeholder="Pin Code"
-                                    className="form-control"
-                                  />
-                                </div>
-                              </div>
-
-                              {/* City Input */}
-                              <div className="col-sm-6">
-                                <div className="control-group">
-                                  <label className="control-label">City*</label>
-                                  <input
-                                    id="city"
-                                    name="city"
-                                    type="text"
-                                    value={formData.city}
-                                    onChange={handleChange}
-                                    placeholder="City"
-                                    className="form-control"
-                                  />
-                                </div>
-                              </div>
-
-                              {/* State Input */}
-                              <div className="col-sm-6">
-                                <div className="control-group">
-                                  <label className="control-label">State*</label>
-                                  <input
-                                    id="state"
-                                    name="state"
-                                    type="text"
-                                    value={formData.state}
-                                    onChange={handleChange}
-                                    placeholder="State"
-                                    className="form-control"
-                                  />
-                                </div>
+                                <label>Pan Number</label>
+                                <input
+                                  name="panCardNumber"
+                                  type="text"
+                                  placeholder="Pan Card No."
+                                  className="form-control"
+                                  value={
+                                    formData.certificateDetails.panCardNumber
+                                  }
+                                  onChange={handleChange}
+                                  required
+                                />
                               </div>
 
                               <div className="col-sm-6">
-                                <div className="control-group">
-                                  <label className="control-label ">Preference State</label>
-                                  <div>
-                                    <input
-                                      name="preferenceState"
-                                      type="text"
-                                      value={formData.preferenceState}
-                                      onChange={handleChange}
-                                      placeholder="Preference State"
-                                      className="form-control"
-                                    />
-                                  </div>
-                                </div>
+                                <label>Address*</label>
+                                <input
+                                  name="certificateAddress"
+                                  type="text"
+                                  placeholder="Address"
+                                  className="form-control"
+                                  value={
+                                    formData.certificateDetails
+                                      .certificateAddress
+                                  }
+                                  onChange={handleChange}
+                                  required
+                                />
+                              </div>
+
+                              <div className="col-sm-6">
+                                <label>Pin Code*</label>
+                                <input
+                                  name="certificatePinCode"
+                                  type="text"
+                                  placeholder="Pin Code"
+                                  className="form-control"
+                                  value={
+                                    formData.certificateDetails
+                                      .certificatePinCode
+                                  }
+                                  onChange={handleChange}
+                                  required
+                                />
+                              </div>
+
+                              <div className="col-sm-6">
+                                <label>City*</label>
+                                <input
+                                  name="certificateCity"
+                                  type="text"
+                                  placeholder="City"
+                                  className="form-control"
+                                  value={
+                                    formData.certificateDetails.certificateCity
+                                  }
+                                  onChange={handleChange}
+                                  required
+                                />
+                              </div>
+
+                              <div className="col-sm-6">
+                                <label>State*</label>
+                                <input
+                                  name="certificateState"
+                                  type="text"
+                                  placeholder="State"
+                                  className="form-control"
+                                  value={
+                                    formData.certificateDetails.certificateState
+                                  }
+                                  onChange={handleChange}
+                                  required
+                                />
+                              </div>
+
+                              <div className="col-sm-6">
+                                <label>Preference State</label>
+                                <input
+                                  name="preferenceState"
+                                  type="text"
+                                  placeholder="Preference State"
+                                  className="form-control"
+                                  value={
+                                    formData.certificateDetails.preferenceState
+                                  }
+                                  onChange={handleChange}
+                                />
                               </div>
                             </>
                           )}
 
-                          {/* Submit Button */}
                           <div className="col-md-12 mt-3 mb-2">
-                            <button id="submit" className="default-btn" type="submit">
+                            <button className="default-btn" type="submit">
                               Submit
                             </button>
                           </div>
                         </div>
-                      </form>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
+            </form>
           </div>
         </section>
       </div>

@@ -1,5 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import Layout from "../layout/Layout";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import axios from "axios";
 
 function VerifyDonation() {
   const [formData, setFormData] = useState({
@@ -7,162 +10,195 @@ function VerifyDonation() {
     email: "",
     contactNumber: "",
     donationAmount: "",
-    screenshot: null
+    donationScreenshot: null,
   });
+
+  const donationScreenshotRef = useRef(null); // Create a reference for the file input
 
   const handleChange = (e) => {
     const { name, value, type, files } = e.target;
     if (type === "file") {
-      setFormData({
-        ...formData,
-        [name]: files[0] 
-      });
+      setFormData((prev) => ({
+        ...prev,
+        [name]: files[0],
+      }));
     } else {
-      setFormData({
-        ...formData,
-        [name]: value
-      });
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Form Submitted:", formData);
+
+    const {
+      firstName,
+      email,
+      contactNumber,
+      donationAmount,
+      donationScreenshot,
+    } = formData;
+
+    if (
+      !firstName ||
+      !email ||
+      !contactNumber ||
+      !donationAmount ||
+      !donationScreenshot
+    ) {
+      toast.error("Please fill in all required fields.");
+      return;
+    }
+
+    const digitsOnly = contactNumber.replace(/\D/g, "");
+    if (digitsOnly.length < 10 || digitsOnly.length > 13) {
+      toast.error("Contact number must be between 10 and 13 digits.");
+      return;
+    }
+
+    const data = {
+      firstName,
+      email,
+      contactNumber,
+      donationAmount,
+    };
+
+    try {
+      const formDataToSend = new FormData();
+
+      for (const [key, value] of Object.entries(data)) {
+        formDataToSend.append(key, value);
+      }
+
+      // Append the file separately
+      formDataToSend.append("donationScreenshot", donationScreenshot);
+
+      const res = await axios.post(
+        "http://sucheta.traficoanalytica.com/api/v1/enquiry/add-verify-donation",
+        formDataToSend,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      if (res.status === 201) {
+        toast.success("Verify Donation form submitted successfully!");
+        setFormData({
+          firstName: "",
+          email: "",
+          contactNumber: "",
+          donationAmount: "",
+          donationScreenshot: null,
+        });
+        donationScreenshotRef.current.value = null; // Reset the file input field
+      } else {
+        toast.error("Something went wrong while submitting the form.");
+      }
+    } catch (error) {
+      console.error("Axios Error:", error);
+      if (error.response) {
+        toast.error(error.response.data?.message || "Server error occurred.");
+      } else if (error.request) {
+        toast.error("No response from server.");
+      } else {
+        toast.error("Request error: " + error.message);
+      }
+    }
   };
 
   return (
     <Layout>
       <div>
         <div className="header-height" />
-        <div>
-          <img
-            loading="lazy"
-            src="assets/img/donate-banner.webp"
-            className="img-fluid"
-            alt=""
-          />
-        </div>
+        <img src="assets/img/donate-banner.webp" className="img-fluid" alt="" />
+
         <section className="pt-5 pb-5">
           <div className="container">
             <div className="section-heading text-center mb-40">
               <h2>Verify Donation</h2>
               <span className="heading-border" />
             </div>
-            <form>
-            <div className="row from">
-              <div className="col-xs-12 col-md-12">
-                <div className="panel panel-default">
-                  <div className="panel-body">
-                    <div className="bodyTest">
-                      <form onSubmit={handleSubmit}>
-                        <div className="row">
-                          <div className="col-sm-6 mb-2">
-                            {/* First Name input */}
-                            <div className="form-group">
-                              <label htmlFor="firstName" className="control-label">
-                                First Name
-                              </label>
-                              <input
-                                id="firstName"
-                                name="firstName"
-                                type="text"
-                                autoComplete="Full Name"
-                                placeholder="First Name"
-                                className="form-control"
-                                value={formData.firstName}
-                                onChange={handleChange}
-                              />
-                            </div>
-                          </div>
-                          <div className="col-sm-6 mb-2">
-                            {/* Email input */}
-                            <div className="form-group">
-                              <label htmlFor="email" className="control-label">
-                                Email
-                              </label>
-                              <input
-                                id="email"
-                                name="email"
-                                type="email"
-                                autoComplete="email"
-                                placeholder="Email"
-                                className="form-control"
-                                value={formData.email}
-                                onChange={handleChange}
-                              />
-                            </div>
-                          </div>
-                          <div className="col-sm-6 mb-2">
-                            {/* Contact Number input */}
-                            <div className="form-group">
-                              <label htmlFor="contactNumber" className="control-label">
-                                Contact No
-                              </label>
-                              <input
-                                id="contactNumber"
-                                name="contactNumber"
-                                type="text"
-                                autoComplete="Contact Number"
-                                placeholder="Contact Number"
-                                className="form-control"
-                                value={formData.contactNumber}
-                                onChange={handleChange}
-                              />
-                            </div>
-                          </div>
-                          <div className="col-sm-6 mb-2">
-                            {/* Donation Amount input */}
-                            <div className="form-group">
-                              <label htmlFor="donationAmount" className="control-label">
-                                Donation Amount Paid
-                              </label>
-                              <input
-                                id="donationAmount"
-                                name="donationAmount"
-                                type="text"
-                                autoComplete="Donation Amount Paid"
-                                placeholder="Donation Amount Paid"
-                                className="form-control"
-                                value={formData.donationAmount}
-                                onChange={handleChange}
-                              />
-                            </div>
-                          </div>
-                          <div className="col-sm-12 mb-2">
-                            {/* Screenshot Upload */}
-                            <div className="form-group">
-                              <label htmlFor="screenshot" className="control-label">
-                                Donation Amount Screenshot (Upload)
-                              </label>
-                              <input
-                                id="screenshot"
-                                name="screenshot"
-                                type="file"
-                                className="form-control"
-                                onChange={handleChange}
-                              />
-                            </div>
-                          </div>
-                          <div className="col-md-12 mt-3 mb-2">
-                            {/* Submit Button */}
-                            <button
-                              id="submit"
-                              className="default-btn"
-                              type="submit"
-                            >
-                              Submit
-                            </button>
-                          </div>
-                        </div>
-                      </form>
-                    </div>
-                  </div>
+            <form onSubmit={handleSubmit}>
+              <div className="row frm">
+                <div className="col-sm-6 mb-3">
+                  <label htmlFor="firstName">First Name</label>
+                  <input
+                    type="text"
+                    name="firstName"
+                    className="form-control"
+                    placeholder="First Name"
+                    value={formData.firstName}
+                    onChange={handleChange}
+                  />
+                </div>
+                <div className="col-sm-6 mb-3">
+                  <label htmlFor="email">Email</label>
+                  <input
+                    type="email"
+                    name="email"
+                    className="form-control"
+                    placeholder="Email"
+                    value={formData.email}
+                    onChange={handleChange}
+                  />
+                </div>
+                <div className="col-sm-6 mb-3">
+                  <label htmlFor="contactNumber">Contact Number</label>
+                  <input
+                    type="tel"
+                    name="contactNumber"
+                    className="form-control"
+                    placeholder="Contact Number"
+                    value={formData.contactNumber}
+                    onChange={handleChange}
+                    pattern="[0-9]{10,13}"
+                    minLength={10}
+                    maxLength={13}
+                    onInput={(e) => {
+                      e.target.value = e.target.value.replace(/[^0-9]/g, "");
+                    }}
+                    required
+                  />
+                </div>
+
+                <div className="col-sm-6 mb-3">
+                  <label htmlFor="donationAmount">Donation Amount Paid</label>
+                  <input
+                    type="number"
+                    name="donationAmount"
+                    className="form-control"
+                    placeholder="Donation Amount Paid"
+                    value={formData.donationAmount}
+                    onChange={handleChange}
+                  />
+                </div>
+                <div className="col-sm-12 mb-4">
+                  <label htmlFor="donationScreenshot">
+                    Donation Amount Screenshot (Upload)
+                  </label>
+                  <input
+                    type="file"
+                    name="donationScreenshot"
+                    id="donationScreenshot"
+                    className="form-control"
+                    onChange={handleChange}
+                    ref={donationScreenshotRef} // Attach the ref
+                  />
+                </div>
+                <div className="col-sm-12">
+                  <button type="submit" className="default-btn">
+                    Submit
+                  </button>
                 </div>
               </div>
-            </div>
             </form>
           </div>
         </section>
+        <ToastContainer position="top-right" autoClose={3000} />
       </div>
     </Layout>
   );
